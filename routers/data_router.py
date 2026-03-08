@@ -100,7 +100,7 @@ async def get_promotions():
 async def get_acces():
     return await safe(db.fetch_view("Condition_acces_niveau", "referentiel",100))
 
-@router.get("/download")
+@router.api_route("/download", methods=["GET", "HEAD"])
 async def download_file(url: str, filename: str):
     async with httpx.AsyncClient(timeout=30) as client:
         r = await client.get(url)

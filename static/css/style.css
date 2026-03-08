@@ -582,3 +582,64 @@ a { text-decoration: none; color: inherit; }
   .admin-tab   { font-size: 12px; padding: 8px 12px; }
 }
 #nav-admin-link { display: none; }
+
+/* ── BURGER MENU ─────────────────────────────────────────────────────────────── */
+.burger {
+  display: none;
+  flex-direction: column;
+  gap: 5px;
+  background: none;
+  border: none;
+  cursor: pointer;
+  padding: 4px;
+}
+
+.burger span {
+  display: block;
+  width: 24px;
+  height: 2px;
+  background: white;
+  border-radius: 2px;
+}
+
+@media (max-width: 768px) {
+  .burger {
+    display: flex !important;
+  }
+
+  .nav-links {
+    display: none;
+    flex-direction: column;
+    width: 100%;
+    background: #1A5276;
+    padding: 12px 0;
+    position: absolute;
+    top: 60px;
+    left: 0;
+    right: 0;
+    z-index: 9999;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.2);
+  }
+
+  .nav-links.open {
+    display: flex !important;
+  }
+
+  .nav-links li a {
+    padding: 10px 20px;
+    display: block;
+    color: white;
+    font-size: 14px;
+  }
+
+  .dropdown-menu {
+    position: static !important;
+    box-shadow: none !important;
+    background: #154360 !important;
+    display: none;
+  }
+
+  .nav-dropdown.open .dropdown-menu {
+    display: block !important;
+  }
+}

@@ -80,34 +80,21 @@ function makeDownloadBtn(url) {
     <div style="display:flex;gap:8px;align-items:center;">
       <a href="${url}" target="_blank" title="Aperçu du document"
          style="display:inline-flex;align-items:center;gap:6px;
-                padding:6px 16px;
-                border-radius:50px;
-                border:1.5px solid #1A5276;
-                background:transparent;
-                color:#1A5276;
-                font-size:11px;font-weight:600;
-                text-decoration:none;
-                transition:all .2s;"
-         onmouseover="this.style.background='#1A5276';this.style.color='white'"
-         onmouseout="this.style.background='transparent';this.style.color='#1A5276'">
+                padding:6px 16px;border-radius:50px;
+                border:1.5px solid #1A5276;background:transparent;
+                color:#1A5276;font-size:11px;font-weight:600;text-decoration:none;">
         <span style="position:relative;display:inline-flex;align-items:center;">
           <i class="fas fa-file-lines" style="font-size:13px;"></i>
           <i class="fas fa-magnifying-glass" style="font-size:8px;position:absolute;bottom:-2px;right:-5px;"></i>
         </span>
         &nbsp;Aperçu
       </a>
-      <a href="${url}" download="${filename}" title="Télécharger"
+      <a href="/api/download?url=${encodeURIComponent(url)}&filename=${encodeURIComponent(filename)}"
+         title="Télécharger"
          style="display:inline-flex;align-items:center;gap:6px;
-                padding:6px 16px;
-                border-radius:50px;
-                border:1.5px solid #2E86C1;
-                background:rgba(46,134,193,0.12);
-                color:#1A5276;
-                font-size:11px;font-weight:600;
-                text-decoration:none;
-                transition:all .2s;"
-         onmouseover="this.style.background='rgba(46,134,193,0.25)'"
-         onmouseout="this.style.background='rgba(46,134,193,0.12)'">
+                padding:6px 16px;border-radius:50px;
+                border:1.5px solid #2E86C1;background:rgba(46,134,193,0.12);
+                color:#1A5276;font-size:11px;font-weight:600;text-decoration:none;">
         <span style="position:relative;display:inline-flex;align-items:center;">
           <i class="fas fa-cloud" style="font-size:15px;color:#2E86C1;opacity:0.7;"></i>
           <i class="fas fa-arrow-down" style="font-size:7px;position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);color:#1A5276;"></i>

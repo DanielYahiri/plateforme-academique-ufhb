@@ -1,6 +1,8 @@
 from fastapi import APIRouter, HTTPException
+from fastapi.responses import StreamingResponse
 from pydantic import BaseModel
 from typing import Optional
+import httpx
 import supabase_client as db
 
 router = APIRouter(tags=["data"])
@@ -97,3 +99,15 @@ async def get_promotions():
 @router.get("/acces")
 async def get_acces():
     return await safe(db.fetch_view("Condition_acces_niveau", "referentiel",100))
+
+@router.get("/download")
+async def download_file(url: str, filename: str):
+    async with httpx.AsyncClient(timeout=30) as client:
+        r = await client.get(url)
+    if r.status_code != 200:
+        raise HTTPException(status_code=404, detail="Fichier introuvable.")
+    return StreamingResponse(
+        iter([r.content]),
+        media_type="application/octet-stream",
+        headers={"Content-Disposition": f"attachment; filename={filename}"}
+    )

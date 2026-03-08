@@ -11,7 +11,7 @@ async def lifespan(app: FastAPI):
     yield
 
 app = FastAPI(
-    title="Plateforme de Gestion Académique",
+    title="Classe-Etoile -plateforme -academique-ufhb",
     version="1.0.0",
     lifespan=lifespan,
 )

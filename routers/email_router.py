@@ -26,16 +26,24 @@ class FeedbackForm(BaseModel):
     message: str
     note:    Optional[int] = None
 
-def send_email(to: str, subject: str, html_body: str):
+import asyncio
+from concurrent.futures import ThreadPoolExecutor
+
+executor = ThreadPoolExecutor(max_workers=2)
+
+def _send_email_sync(to: str, subject: str, html_body: str):
     msg = MIMEMultipart("alternative")
     msg["Subject"] = subject
     msg["From"]    = GMAIL_USER
     msg["To"]      = to
     msg.attach(MIMEText(html_body, "html", "utf-8"))
-    with smtplib.SMTP_SSL("smtp.gmail.com", 465) as server:
+    with smtplib.SMTP_SSL("smtp.gmail.com", 465, timeout=15) as server:
         server.login(GMAIL_USER, GMAIL_PASSWORD)
         server.sendmail(GMAIL_USER, to, msg.as_string())
 
+async def send_email(to: str, subject: str, html_body: str):
+    loop = asyncio.get_event_loop()
+    await loop.run_in_executor(executor, _send_email_sync, to, subject, html_body)
 def wrap(title: str, content: str) -> str:
     return f"""<!DOCTYPE html><html><head><meta charset="utf-8"></head>
 <body style="font-family:Segoe UI,Arial,sans-serif;background:#f4f6f7;padding:30px;">

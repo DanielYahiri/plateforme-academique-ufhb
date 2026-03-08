@@ -2,4 +2,4 @@
 --pycache__/
 *.pyc
 .env
-config.py
+

@@ -1,83 +1,38 @@
-{% extends "base.html" %}
-{% block title %}Connexion — Plateforme Académique{% endblock %}
+function toggleMenu() {
+  const nav = document.getElementById('navLinks');
+  nav.classList.toggle('open');
+}
 
-{% block content %}
-<div class="form-page-container">
+document.addEventListener('DOMContentLoaded', function() {
 
-  <div class="form-hero" style="background:linear-gradient(135deg,#1A5276,#2E86C1);">
-    <h1><i class="fas fa-right-to-bracket"></i> Se connecter</h1>
-    <p>Accédez à votre espace sur la plateforme académique.</p>
-  </div>
-
-  <div class="form-card">
-    <div id="formAlert" class="form-alert hidden"></div>
-
-    <form id="connexionForm" onsubmit="submitConnexion(event)">
-
-      <div class="form-group">
-        <label>Adresse email <span class="req">*</span></label>
-        <input type="email" name="email" required placeholder="email@exemple.com">
-      </div>
-
-      <div class="form-group">
-        <label>Mot de passe <span class="req">*</span></label>
-        <input type="password" name="mot_de_passe" required placeholder="Votre mot de passe">
-      </div>
-
-      <button type="submit" class="btn btn-primary btn-lg btn-full" id="submitBtn">
-  <i class="fas fa-right-to-bracket"></i> Se connecter
-</button>
-
-      <p style="text-align:center;margin-top:18px;font-size:13px;color:#7F8C8D;">
-        Pas encore de compte ? <a href="/inscription" style="color:#2E86C1;font-weight:600;">S'inscrire</a>
-      </p>
-
-    </form>
-  </div>
-</div>
-{% endblock %}
-
-{% block scripts %}
-<script>
-async function submitConnexion(e) {
-  e.preventDefault();
-  const btn = document.getElementById('submitBtn');
-  btn.disabled = true;
-  btn.textContent = "⏳ Connexion en cours…";
-
-  const fd   = new FormData(e.target);
-  const body = {
-    email:        fd.get('email'),
-    mot_de_passe: fd.get('mot_de_passe'),
-  };
-
-  try {
-    const r = await fetch('/api/auth/connexion', {
-      method: 'POST',
-      headers: {'Content-Type': 'application/json'},
-      body: JSON.stringify(body)
+  // Dropdown mobile au clic
+  document.querySelectorAll('.nav-dropdown > a').forEach(function(el) {
+    el.addEventListener('click', function(e) {
+      if (window.innerWidth <= 768) {
+        e.preventDefault();
+        el.closest('.nav-dropdown').classList.toggle('open');
+      }
     });
-    const data = await r.json();
-    if (r.ok) {
-      // Sauvegarde les infos utilisateur
-      localStorage.setItem('user', JSON.stringify(data.user));
-      showAlert('success', '✅ ' + data.message);
-      setTimeout(() => location.href = '/', 1500);
-    } else {
-      showAlert('error', '❌ ' + (data.detail || 'Erreur.'));
-    }
-  } catch {
-    showAlert('error', '❌ Impossible de contacter le serveur.');
-  } finally {
-    btn.disabled = false;
-    btn.textContent = "🔐 Se connecter";
-  }
-}
+  });
 
-function showAlert(type, msg) {
-  const el = document.getElementById('formAlert');
-  el.className = 'form-alert form-alert-' + type;
-  el.textContent = msg;
-  el.scrollIntoView({behavior: 'smooth', block: 'center'});
+  // Fermer menu si clic extérieur
+  document.addEventListener('click', function(e) {
+    const nav = document.getElementById('navLinks');
+    const burger = document.querySelector('.burger');
+    if (nav && burger && !nav.contains(e.target) && !burger.contains(e.target)) {
+      nav.classList.remove('open');
+    }
+  });
+
+  // Admin link
+  checkAdminLink();
+});
+
+function checkAdminLink() {
+  try {
+    const u = JSON.parse(localStorage.getItem('user') || '{}');
+    const el = document.getElementById('nav-admin-link');
+    if (!el) return;
+    el.style.display = u.role === 'admin' ? 'block' : 'none';
+  } catch(e) {}
 }
-</script>

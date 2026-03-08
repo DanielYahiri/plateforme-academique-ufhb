@@ -1,0 +1,86 @@
+{% extends "base.html" %}
+{% block title %}Devoirs — Plateforme Académique{% endblock %}
+{% block nav_academic %}active{% endblock %}
+
+{% block content %}
+<div class="page-container">
+  <div class="page-header">
+    <div>
+      <h1 class="page-title">📚  Devoirs par Niveau et Matière</h1>
+      <p class="page-sub">Sujets de devoirs par niveau et matière</p>
+    </div>
+    <button class="btn btn-primary" onclick="loadData()"><i class="fas fa-rotate-right"></i> Actualiser</button>
+  </div>
+
+  <div class="filter-bar">
+    <div class="filter-group">
+      <label class="filter-label">Année</label>
+      <select class="filter-select" data-key="p_code_annee">
+        <option value="">Toutes</option>
+        <option value="2018">2018</option>
+        <option value="2019">2019</option>
+        <option value="2020">2020</option>
+        <option value="2021">2021</option>
+        <option value="2022">2022</option>
+        <option value="2023">2023</option>
+        <option value="2024">2024</option>
+        <option value="2025">2025</option>
+        <option value="2026">2026</option>
+      </select>
+    </div>
+    <div class="filter-group">
+      <label class="filter-label">Niveau</label>
+      <select class="filter-select" data-key="p_code_niveau">
+        <option value="">Tous</option>
+        <option value="L1">L1</option>
+        <option value="L2">L2</option>
+        <option value="L3">L3</option>
+      </select>
+    </div>
+    <div class="filter-group">
+      <label class="filter-label">Semestre</label>
+      <select class="filter-select" data-key="p_sem_mat">
+        <option value="">Tous</option>
+        <option value="1">Semestre 1</option>
+        <option value="2">Semestre 2</option>
+      </select>
+    </div>
+    <div class="filter-actions">
+  <button class="btn btn-secondary" onclick="applyFilter()"><i class="fas fa-magnifying-glass"></i> Filtrer</button>
+  <button class="btn btn-danger-outline" onclick="resetFilter()"><i class="fas fa-rotate-left"></i> Réinitialiser</button>
+</div>
+  </div>
+
+  <div class="table-toolbar">
+    <input type="text" class="search-input" id="searchInput"
+           placeholder="🔍 Rechercher dans les résultats..."
+           oninput="localSearch(this.value)">
+    <span class="count-badge" id="countBadge">0 résultats</span>
+  </div>
+
+  <div class="table-wrap">
+    <div class="table-loading" id="tableLoading">
+      <div class="spinner"></div><span>Chargement…</span>
+    </div>
+    <div id="tableEmpty" class="table-empty hidden">Aucune donnée.</div>
+    <div id="tableError" class="table-error hidden"></div>
+    <table class="data-table" id="dataTable">
+      <thead id="tableHead"></thead>
+      <tbody id="tableBody"></tbody>
+    </table>
+  </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+const API_GET  = "/api/devoirs";
+const API_POST = "/api/devoirs/filter";
+const COL_LABELS = {
+  "code_annee":"Année","code_niveau":"Niveau","num_dev":"N° Devoir",
+  "code_mat":"Code Mat.","nom_mat":"Matière","type_mat":"Type",
+  "sem_mat":"Semestre","credit":"Crédits","sujet_dev":"Sujet"
+};
+</script>
+<script src="/static/js/table.js"></script>
+{% endblock %}

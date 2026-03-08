@@ -1,0 +1,117 @@
+{% extends "base.html" %}
+{% block title %}Feedback — Plateforme Académique{% endblock %}
+{% block nav_feedback %}active{% endblock %}
+
+{% block content %}
+<div class="form-page-container">
+
+  <div class="form-hero" style="background:linear-gradient(135deg,#1E8449,#27AE60);">
+    <h1>💬 Votre feedback</h1>
+    <p>Signalez un problème, proposez une amélioration ou partagez votre expérience.</p>
+  </div>
+
+  <div class="form-card">
+    <div id="formAlert" class="form-alert hidden"></div>
+
+    <div class="stars-wrap">
+      <p class="stars-label">Évaluez votre expérience</p>
+      <div class="stars" id="starsRow">
+        <span class="star" data-val="1" onclick="setNote(1)">★</span>
+        <span class="star" data-val="2" onclick="setNote(2)">★</span>
+        <span class="star" data-val="3" onclick="setNote(3)">★</span>
+        <span class="star" data-val="4" onclick="setNote(4)">★</span>
+        <span class="star" data-val="5" onclick="setNote(5)">★</span>
+      </div>
+      <input type="hidden" id="noteInput" value="">
+    </div>
+
+    <form id="feedbackForm" onsubmit="submitFeedback(event)">
+      <div class="form-grid-2">
+        <div class="form-group">
+          <label>Votre nom <span class="req">*</span></label>
+          <input type="text" name="nom" required placeholder="Votre nom">
+        </div>
+        <div class="form-group">
+          <label>Votre email <span class="req">*</span></label>
+          <input type="email" name="email" required placeholder="email@exemple.com">
+        </div>
+      </div>
+
+      <div class="form-group">
+        <label>Sujet <span class="req">*</span></label>
+        <select name="sujet" required>
+          <option value="">-- Type de feedback --</option>
+          <option value="Signalement d'erreur">🐛 Signalement d'erreur</option>
+          <option value="Suggestion d'amélioration">💡 Suggestion d'amélioration</option>
+          <option value="Problème de connexion">🔌 Problème de connexion</option>
+          <option value="Données incorrectes">📊 Données incorrectes</option>
+          <option value="Autre">💬 Autre</option>
+        </select>
+      </div>
+
+      <div class="form-group">
+        <label>Message <span class="req">*</span></label>
+        <textarea name="message" rows="5" required
+          placeholder="Décrivez votre retour en détail…"></textarea>
+      </div>
+
+      <button type="submit" class="btn btn-success btn-lg btn-full" id="submitBtn">
+  <i class="fas fa-comment-dots"></i> Envoyer le feedback
+</button>
+    </form>
+  </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+let currentNote = null;
+
+function setNote(val) {
+  currentNote = val;
+  document.getElementById('noteInput').value = val;
+  document.querySelectorAll('.star').forEach(s => {
+    s.classList.toggle('active', parseInt(s.dataset.val) <= val);
+  });
+}
+
+async function submitFeedback(e) {
+  e.preventDefault();
+  const btn = document.getElementById('submitBtn');
+  btn.disabled = true;
+  btn.textContent = "⏳ Envoi en cours…";
+
+  const fd   = new FormData(e.target);
+  const body = Object.fromEntries(fd.entries());
+  body.note  = currentNote;
+
+  try {
+    const r = await fetch('/api/email/feedback', {
+      method: 'POST',
+      headers: {'Content-Type': 'application/json'},
+      body: JSON.stringify(body)
+    });
+    const data = await r.json();
+    if (r.ok) {
+      showAlert('success', '✅ ' + data.message);
+      e.target.reset();
+      setNote(0);
+    } else {
+      showAlert('error', '❌ ' + (data.detail || 'Erreur.'));
+    }
+  } catch {
+    showAlert('error', '❌ Impossible de contacter le serveur.');
+  } finally {
+    btn.disabled = false;
+    btn.textContent = "💬 Envoyer le feedback";
+  }
+}
+
+function showAlert(type, msg) {
+  const el = document.getElementById('formAlert');
+  el.className = 'form-alert form-alert-' + type;
+  el.textContent = msg;
+  el.scrollIntoView({behavior: 'smooth', block: 'center'});
+}
+</script>
+{% endblock %}

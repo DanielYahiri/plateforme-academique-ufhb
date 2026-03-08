@@ -1,0 +1,160 @@
+{% extends "base.html" %}
+{% block title %}Accueil — Plateforme Académique{% endblock %}
+{% block nav_home %}active{% endblock %}
+
+{% block content %}
+
+<section class="hero">
+  <div class="hero-content">
+    <div class="hero-text">
+      <span class="hero-badge">
+  <img src="/static/img/logo_ufhb.png" style="height:20px;vertical-align:middle;margin-right:6px;border-radius:50%;">
+  Université Félix Houphouët-Boigny
+</span>
+      <h1 class="hero-title">
+        Plateforme de<br>
+        <span class="hero-accent">Gestion Académique</span>
+      </h1>
+      <p class="hero-desc">
+        Accédez à l'ensemble des ressources pédagogiques de la classe Etoile: devoirs, examens,
+        travaux dirigés, supports de cours et informations sur les étudiants admis —
+        le tout centralisé et filtrable en quelques clics.
+      </p>
+      <div class="hero-actions">
+        <a href="/devoirs" class="btn btn-primary"><i class="fas fa-book-open"></i> Voir les Devoirs</a>
+<a href="/soumettre" class="btn btn-outline"><i class="fas fa-upload"></i> Soumettre un sujet</a>
+      </div>
+    </div>
+    <div class="hero-image-wrap">
+      <img src="/static/img/hero.jpg"
+           alt="Étudiant en cours"
+           class="hero-img"
+           onerror="this.src='https://images.unsplash.com/photo-1562774053-701939374585?w=700&q=80'">
+      <div class="hero-img-badge">
+        <span class="badge-num" id="statTotal">—</span>
+        <span class="badge-lbl">ressources disponibles</span>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section class="stats-section">
+  <div class="stats-grid">
+    <div class="stat-card" onclick="location.href='/devoirs'">
+      <div class="stat-icon" style="background:#1A5276"><i class="fas fa-book fa-lg" style="color:white"></i></div>
+      <div class="stat-body">
+        <span class="stat-num" id="nb-devoirs">—</span>
+        <span class="stat-lbl">Devoirs</span>
+      </div>
+    </div>
+    <div class="stat-card" onclick="location.href='/examens'">
+      <div class="stat-icon" style="background:#2E86C1"><i class="fas fa-file-alt fa-lg" style="color:white"></i></div>
+      <div class="stat-body">
+        <span class="stat-num" id="nb-examens">—</span>
+        <span class="stat-lbl">Examens</span>
+      </div>
+    </div>
+    <div class="stat-card" onclick="location.href='/td'">
+      <div class="stat-icon" style="background:#7D3C98"><i class="fas fa-chalkboard-teacher fa-lg" style="color:white"></i></div>
+      <div class="stat-body">
+        <span class="stat-num" id="nb-td">—</span>
+        <span class="stat-lbl">Travaux Dirigés</span>
+      </div>
+    </div>
+    <div class="stat-card" onclick="location.href='/etudiants'">
+      <div class="stat-icon" style="background:#1E8449"><i class="fas fa-user-graduate fa-lg" style="color:white"></i></div>
+      <div class="stat-body">
+        <span class="stat-num" id="nb-etudiants">—</span>
+        <span class="stat-lbl">Étudiants Admis</span>
+      </div>
+    </div>
+    <div class="stat-card" onclick="location.href='/matieres'">
+      <div class="stat-icon" style="background:#F39C12"><i class="fas fa-list fa-lg" style="color:white"></i></div>
+      <div class="stat-body">
+        <span class="stat-num" id="nb-matieres">—</span>
+        <span class="stat-lbl">Matières (UE)</span>
+      </div>
+    </div>
+    <div class="stat-card" onclick="location.href='/supports'">
+      <div class="stat-icon" style="background:#922B21"><i class="fas fa-folder-open fa-lg" style="color:white"></i></div>
+      <div class="stat-body">
+        <span class="stat-num" id="nb-supports">—</span>
+        <span class="stat-lbl">Supports de Cours</span>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section class="features-section">
+  <h2 class="section-title">Tout ce dont vous avez besoin</h2>
+  <p class="section-sub">Une plateforme unique pour centraliser toutes les ressources pédagogiques.</p>
+  <div class="features-grid">
+    <div class="feature-card">
+      <div class="feature-icon"><i class="fas fa-filter" style="color:#2E86C1"></i></div>
+      <h3>Filtrage avancé</h3>
+      <p>Filtrez par année, niveau (L1/L2/L3), matière et semestre. Les résultats s'affichent instantanément.</p>
+    </div>
+    <div class="feature-card">
+      <div class="feature-icon"><i class="fas fa-upload" style="color:#F39C12"></i></div>
+      <h3>Soumission de sujets</h3>
+      <p>Vous possédez un sujet ? Soumettez-le directement depuis la plateforme par email.</p>
+    </div>
+    <div class="feature-card">
+      <div class="feature-icon"><i class="fas fa-chart-bar" style="color:#1E8449"></i></div>
+      <h3>Statistiques des promotions</h3>
+      <p>Consultez le nombre d'admis par promotion, par genre et par année de sortie.</p>
+    </div>
+    <div class="feature-card">
+      <div class="feature-icon"><i class="fas fa-key" style="color:#7D3C98"></i></div>
+      <h3>Conditions d'accès</h3>
+      <p>Retrouvez les conditions d'accès à chaque niveau de formation de la licence.</p>
+    </div>
+    <div class="feature-card">
+      <div class="feature-icon"><i class="fas fa-comment-dots" style="color:#922B21"></i></div>
+      <h3>Feedback</h3>
+      <p>Signalez un problème ou proposez une amélioration via le formulaire intégré.</p>
+    </div>
+    <div class="feature-card">
+      <div class="feature-icon"><i class="fas fa-bolt" style="color:#1A5276"></i></div>
+      <h3>Temps réel</h3>
+      <p>Données synchronisées en temps réel avec Supabase. Toujours à jour.</p>
+    </div>
+  </div>
+</section>
+
+<section class="cta-section">
+  <div class="cta-inner">
+    <h2>Vous avez un sujet à partager ?</h2>
+    <p>Contribuez à enrichir la base documentaire en soumettant vos sujets d'examens, devoirs ou TD.</p>
+    <a href="/soumettre" class="btn btn-white">📤 Soumettre un sujet maintenant</a>
+  </div>
+</section>
+
+{% endblock %}
+
+{% block scripts %}
+<script>
+async function loadStats() {
+  const endpoints = [
+    { url: '/api/devoirs',   id: 'nb-devoirs'   },
+    { url: '/api/examens',   id: 'nb-examens'   },
+    { url: '/api/td',        id: 'nb-td'        },
+    { url: '/api/etudiants', id: 'nb-etudiants' },
+    { url: '/api/matieres',  id: 'nb-matieres'  },
+    { url: '/api/supports',  id: 'nb-supports'  },
+  ];
+  let total = 0;
+  for (const ep of endpoints) {
+    try {
+      const r = await fetch(ep.url);
+      const d = await r.json();
+      const n = Array.isArray(d) ? d.length : 0;
+      document.getElementById(ep.id).textContent = n;
+      total += n;
+    } catch {}
+  }
+  document.getElementById('statTotal').textContent = total;
+}
+loadStats();
+</script>
+{% endblock %}

@@ -1,0 +1,49 @@
+{% extends "base.html" %}
+{% block title %}Conditions d'Accès — Plateforme Académique{% endblock %}
+{% block nav_ref %}active{% endblock %}
+
+{% block content %}
+<div class="page-container">
+  <div class="page-header">
+    <div>
+      <h1 class="page-title">🔑  Conditions d'Accès par Niveau</h1>
+      <p class="page-sub">Conditions d'accès à chaque niveau scolaire</p>
+    </div>
+    <button class="btn btn-primary" onclick="loadData()"><i class="fas fa-rotate-right"></i> Actualiser</button>
+  </div>
+
+  <div class="filter-bar">
+    <span class="filter-none">Vue de référence — pas de filtre disponible</span>
+  </div>
+
+  <div class="table-toolbar">
+    <input type="text" class="search-input" id="searchInput"
+           placeholder="🔍 Rechercher dans les résultats..."
+           oninput="localSearch(this.value)">
+    <span class="count-badge" id="countBadge">0 résultats</span>
+  </div>
+
+  <div class="table-wrap">
+    <div class="table-loading" id="tableLoading">
+      <div class="spinner"></div><span>Chargement…</span>
+    </div>
+    <div id="tableEmpty" class="table-empty hidden">Aucune donnée.</div>
+    <div id="tableError" class="table-error hidden"></div>
+    <table class="data-table" id="dataTable">
+      <thead id="tableHead"></thead>
+      <tbody id="tableBody"></tbody>
+    </table>
+  </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+const API_GET  = "/api/acces";
+const API_POST = null;
+const COL_LABELS = {
+  "code_niveau":"Code Niveau"
+};
+</script>
+<script src="/static/js/table.js"></script>
+{% endblock %}

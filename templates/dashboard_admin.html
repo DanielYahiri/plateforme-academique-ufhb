@@ -1,0 +1,513 @@
+{% extends "base.html" %}
+{% block title %}Dashboard Admin — Plateforme Académique{% endblock %}
+
+{% block content %}
+<div class="page-container">
+  <div class="page-header">
+    <div>
+      <h1 class="page-title"><i class="fas fa-chart-pie"></i> Tableau de Bord Admin</h1>
+      <p class="page-sub">Gestion des utilisateurs et des documents</p>
+    </div>
+    <button class="btn btn-primary" onclick="loadUsers()"><i class="fas fa-rotate-right"></i> Actualiser</button>
+  </div>
+
+  <!-- Onglets -->
+  <div class="admin-tabs">
+    <button class="admin-tab active" onclick="switchTab('utilisateurs', this)">
+      <i class="fas fa-users-line"></i> Utilisateurs
+    </button>
+    <button class="admin-tab" onclick="switchTab('ajouter', this)">
+      <i class="fas fa-file-circle-plus"></i> Ajouter
+    </button>
+    <button class="admin-tab" onclick="switchTab('modifier', this)">
+      <i class="fas fa-file-pen"></i> Modifier
+    </button>
+    <button class="admin-tab" onclick="switchTab('supprimer', this)">
+      <i class="fas fa-file-circle-xmark"></i> Supprimer
+    </button>
+  </div>
+
+  <!-- ── ONGLET UTILISATEURS ── -->
+  <div id="tab-utilisateurs" class="tab-content">
+    <div class="stats-grid" style="margin-bottom:24px;">
+      <div class="stat-card">
+        <div class="stat-icon" style="background:#1A5276"><i class="fas fa-users fa-lg" style="color:white"></i></div>
+        <div class="stat-body"><span class="stat-num" id="nb-total">—</span><span class="stat-lbl">Total inscrits</span></div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-icon" style="background:#1E8449"><i class="fas fa-circle-check fa-lg" style="color:white"></i></div>
+        <div class="stat-body"><span class="stat-num" id="nb-actif">—</span><span class="stat-lbl">Actifs</span></div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-icon" style="background:#F39C12"><i class="fas fa-user-graduate fa-lg" style="color:white"></i></div>
+        <div class="stat-body"><span class="stat-num" id="nb-etudiant">—</span><span class="stat-lbl">Étudiants</span></div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-icon" style="background:#7D3C98"><i class="fas fa-chalkboard-teacher fa-lg" style="color:white"></i></div>
+        <div class="stat-body"><span class="stat-num" id="nb-enseignant">—</span><span class="stat-lbl">Enseignants</span></div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-icon" style="background:#2E86C1"><i class="fas fa-eye fa-lg" style="color:white"></i></div>
+        <div class="stat-body"><span class="stat-num" id="nb-visiteur">—</span><span class="stat-lbl">Visiteurs</span></div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-icon" style="background:#922B21"><i class="fas fa-ban fa-lg" style="color:white"></i></div>
+        <div class="stat-body"><span class="stat-num" id="nb-banni">—</span><span class="stat-lbl">Bannis</span></div>
+      </div>
+    </div>
+
+    <div class="table-toolbar">
+      <input type="text" class="search-input" id="searchInput"
+             placeholder="🔍 Rechercher un utilisateur..."
+             oninput="filtrerUsers(this.value)">
+      <span class="count-badge" id="countBadge">0 utilisateurs</span>
+    </div>
+
+    <div class="table-wrap">
+      <div class="table-loading" id="tableLoading">
+        <div class="spinner"></div><span>Chargement…</span>
+      </div>
+      <div id="tableEmpty" class="table-empty hidden">Aucun utilisateur.</div>
+      <div id="tableError" class="table-error hidden"></div>
+      <table class="data-table" id="dataTable" style="display:none;">
+        <thead>
+          <tr>
+            <th>#</th>
+            <th>Nom & Prénoms</th>
+            <th>Email</th>
+            <th>Rôle</th>
+            <th>Statut</th>
+            <th>Inscription</th>
+            <th>Dernière connexion</th>
+            <th>IP</th>
+            <th>Actions</th>
+          </tr>
+        </thead>
+        <tbody id="tableBody"></tbody>
+      </table>
+    </div>
+  </div>
+
+  <!-- ── ONGLET AJOUTER ── -->
+  <div id="tab-ajouter" class="tab-content hidden">
+    <div class="admin-form-card">
+      <h2 class="admin-form-title"><i class="fas fa-file-circle-plus"></i> Ajouter un document</h2>
+      <div id="alertAjouter" class="form-alert hidden"></div>
+
+      <div class="form-grid-2">
+        <div class="form-group">
+          <label>Type de document <span class="req">*</span></label>
+          <select id="type_doc_add" onchange="updateForm()" required>
+            <option value="">-- Choisir --</option>
+            <option value="devoir">📚 Devoir</option>
+            <option value="examen">📝 Examen</option>
+            <option value="td">📖 Travail Dirigé</option>
+            <option value="support_cours">💾 Support de Cours</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <label>Code Matière <span class="req">*</span></label>
+          <input type="text" id="code_mat_add" placeholder="Ex: ECO13">
+        </div>
+      </div>
+
+      <div class="form-grid-2" id="champs_niveau_annee">
+        <div class="form-group">
+          <label>Niveau <span class="req">*</span></label>
+          <select id="code_niveau_add">
+            <option value="">-- Choisir --</option>
+            <option value="L1">L1</option>
+            <option value="L2">L2</option>
+            <option value="L3">L3</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <label>Année <span class="req">*</span></label>
+          <select id="code_annee_add">
+            <option value="">-- Choisir --</option>
+            <option value="2026">2026</option>
+            <option value="2025">2025</option>
+            <option value="2024">2024</option>
+            <option value="2023">2023</option>
+            <option value="2022">2022</option>
+            <option value="2021">2021</option>
+            <option value="2020">2020</option>
+            <option value="2019">2019</option>
+          </select>
+        </div>
+      </div>
+
+      <div id="champ_num_dev" class="form-group hidden">
+        <label>Numéro du devoir <span class="req">*</span></label>
+        <input type="number" id="num_dev_add" placeholder="Ex: 1">
+      </div>
+
+      <div id="champ_session" class="form-group hidden">
+        <label>Session <span class="req">*</span></label>
+        <select id="session_add">
+          <option value="">-- Choisir --</option>
+          <option value="1">Session 1</option>
+          <option value="2">Session 2</option>
+        </select>
+      </div>
+
+      <div id="champ_sem_td" class="form-group hidden">
+        <label>Semestre <span class="req">*</span></label>
+        <select id="sem_td_add">
+          <option value="">-- Choisir --</option>
+          <option value="1">Semestre 1</option>
+          <option value="2">Semestre 2</option>
+        </select>
+      </div>
+
+      <div class="form-group">
+        <label>Dossier dans le bucket <span class="req">*</span></label>
+        <input type="text" id="folder_add" placeholder="Ex: devoir_L2_24">
+      </div>
+
+      <div class="form-group">
+        <label>Fichier PDF <span class="req">*</span></label>
+        <div class="upload-zone" id="uploadZoneAdd"
+             onclick="document.getElementById('fichier_add').click()"
+             ondragover="event.preventDefault();this.style.borderColor='#2E86C1'"
+             ondragleave="this.style.borderColor='#D5D8DC'"
+             ondrop="handleDrop(event,'fichier_add','fichier_add_name')">
+          <i class="fas fa-cloud-arrow-up" style="font-size:40px;color:#2E86C1;"></i>
+          <p style="margin:10px 0 4px;font-weight:600;color:#1A5276;font-size:14px;">
+            Cliquez ou glissez votre PDF ici
+          </p>
+          <p style="font-size:12px;color:#888;">Fichiers PDF uniquement</p>
+          <p id="fichier_add_name" style="font-size:12px;color:#1E8449;margin-top:8px;font-weight:600;"></p>
+        </div>
+        <input type="file" id="fichier_add" accept=".pdf" style="display:none"
+               onchange="document.getElementById('fichier_add_name').textContent = this.files[0]?.name || ''">
+      </div>
+
+      <button class="btn btn-primary btn-lg btn-full" onclick="ajouterDocument()">
+        <i class="fas fa-file-circle-plus"></i> Ajouter le document
+      </button>
+    </div>
+  </div>
+
+  <!-- ── ONGLET MODIFIER ── -->
+  <div id="tab-modifier" class="tab-content hidden">
+    <div class="admin-form-card">
+      <h2 class="admin-form-title"><i class="fas fa-file-pen"></i> Modifier un document</h2>
+      <div id="alertModifier" class="form-alert hidden"></div>
+
+      <div class="form-grid-2">
+        <div class="form-group">
+          <label>Type de document <span class="req">*</span></label>
+          <select id="type_doc_mod">
+            <option value="">-- Choisir --</option>
+            <option value="devoir">📚 Devoir</option>
+            <option value="examen">📝 Examen</option>
+            <option value="td">📖 Travail Dirigé</option>
+            <option value="support_cours">💾 Support de Cours</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <label>ID du document <span class="req">*</span></label>
+          <input type="text" id="code_id_mod" placeholder="UUID du document">
+        </div>
+      </div>
+
+      <div class="form-group">
+        <label>Dossier dans le bucket <span class="req">*</span></label>
+        <input type="text" id="folder_mod" placeholder="Ex: devoir_L2_24">
+      </div>
+
+      <div class="form-group">
+        <label>Nouveau fichier PDF <span class="req">*</span></label>
+        <div class="upload-zone"
+             onclick="document.getElementById('fichier_mod').click()"
+             ondragover="event.preventDefault();this.style.borderColor='#F39C12'"
+             ondragleave="this.style.borderColor='#D5D8DC'"
+             ondrop="handleDrop(event,'fichier_mod','fichier_mod_name')">
+          <i class="fas fa-cloud-arrow-up" style="font-size:40px;color:#F39C12;"></i>
+          <p style="margin:10px 0 4px;font-weight:600;color:#1A5276;font-size:14px;">
+            Cliquez ou glissez votre PDF ici
+          </p>
+          <p style="font-size:12px;color:#888;">Fichiers PDF uniquement</p>
+          <p id="fichier_mod_name" style="font-size:12px;color:#1E8449;margin-top:8px;font-weight:600;"></p>
+        </div>
+        <input type="file" id="fichier_mod" accept=".pdf" style="display:none"
+               onchange="document.getElementById('fichier_mod_name').textContent = this.files[0]?.name || ''">
+      </div>
+
+      <button class="btn btn-secondary btn-lg btn-full" onclick="modifierDocument()">
+        <i class="fas fa-file-pen"></i> Mettre à jour le document
+      </button>
+    </div>
+  </div>
+
+  <!-- ── ONGLET SUPPRIMER ── -->
+  <div id="tab-supprimer" class="tab-content hidden">
+    <div class="admin-form-card">
+      <h2 class="admin-form-title"><i class="fas fa-file-circle-xmark"></i> Supprimer un document</h2>
+      <div id="alertSupprimer" class="form-alert hidden"></div>
+
+      <div class="form-grid-2">
+        <div class="form-group">
+          <label>Type de document <span class="req">*</span></label>
+          <select id="type_doc_sup">
+            <option value="">-- Choisir --</option>
+            <option value="devoir">📚 Devoir</option>
+            <option value="examen">📝 Examen</option>
+            <option value="td">📖 Travail Dirigé</option>
+            <option value="support_cours">💾 Support de Cours</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <label>ID du document <span class="req">*</span></label>
+          <input type="text" id="code_id_sup" placeholder="UUID du document">
+        </div>
+      </div>
+
+      <div class="form-group">
+        <label>Chemin fichier dans le bucket <span class="req">*</span></label>
+        <input type="text" id="path_sup" placeholder="Ex: devoir_L2_24/fichier.pdf">
+      </div>
+
+      <button class="btn btn-danger-outline btn-lg btn-full" onclick="confirmerSuppression()">
+        <i class="fas fa-file-circle-xmark"></i> Supprimer le document
+      </button>
+    </div>
+  </div>
+
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+let ALL_USERS = [];
+
+const ROLE_COLORS   = { admin:'#1A5276', enseignant:'#7D3C98', etudiant:'#1E8449', visiteur:'#2E86C1' };
+const STATUT_COLORS = { actif:'#1E8449', inactif:'#F39C12', banni:'#922B21' };
+
+function badge(text, color) {
+  return `<span style="background:${color};color:white;padding:3px 10px;border-radius:12px;font-size:11px;font-weight:600;">${text}</span>`;
+}
+
+function formatDate(d) {
+  if (!d) return '<span style="color:#aaa">—</span>';
+  return new Date(d).toLocaleDateString('fr-FR', {
+    day:'2-digit', month:'2-digit', year:'numeric',
+    hour:'2-digit', minute:'2-digit'
+  });
+}
+
+function switchTab(name, btn) {
+  document.querySelectorAll('.tab-content').forEach(t => t.classList.add('hidden'));
+  document.querySelectorAll('.admin-tab').forEach(t => t.classList.remove('active'));
+  document.getElementById('tab-' + name).classList.remove('hidden');
+  btn.classList.add('active');
+}
+
+function updateForm() {
+  const type = document.getElementById('type_doc_add').value;
+  document.getElementById('champ_num_dev').classList.add('hidden');
+  document.getElementById('champ_session').classList.add('hidden');
+  document.getElementById('champ_sem_td').classList.add('hidden');
+  document.getElementById('champs_niveau_annee').style.display = 'grid';
+  if (type === 'devoir')        document.getElementById('champ_num_dev').classList.remove('hidden');
+  if (type === 'examen')        document.getElementById('champ_session').classList.remove('hidden');
+  if (type === 'td')            document.getElementById('champ_sem_td').classList.remove('hidden');
+  if (type === 'support_cours') document.getElementById('champs_niveau_annee').style.display = 'none';
+}
+
+function handleDrop(e, inputId, nameId) {
+  e.preventDefault();
+  const file = e.dataTransfer.files[0];
+  if (file && file.type === 'application/pdf') {
+    const input = document.getElementById(inputId);
+    const dt = new DataTransfer();
+    dt.items.add(file);
+    input.files = dt.files;
+    document.getElementById(nameId).textContent = file.name;
+  }
+}
+
+async function loadUsers() {
+  document.getElementById('tableLoading').classList.remove('hidden');
+  document.getElementById('dataTable').style.display = 'none';
+  document.getElementById('tableError').classList.add('hidden');
+  try {
+    const r = await fetch('/api/auth/utilisateurs');
+    if (!r.ok) throw new Error(`HTTP ${r.status}`);
+    ALL_USERS = await r.json();
+    renderUsers(ALL_USERS);
+    updateStats(ALL_USERS);
+  } catch(e) {
+    document.getElementById('tableError').classList.remove('hidden');
+    document.getElementById('tableError').textContent = '❌ Erreur : ' + e.message;
+  } finally {
+    document.getElementById('tableLoading').classList.add('hidden');
+  }
+}
+
+function updateStats(users) {
+  document.getElementById('nb-total').textContent      = users.length;
+  document.getElementById('nb-actif').textContent      = users.filter(u => u.statut === 'actif').length;
+  document.getElementById('nb-etudiant').textContent   = users.filter(u => u.role === 'etudiant').length;
+  document.getElementById('nb-enseignant').textContent = users.filter(u => u.role === 'enseignant').length;
+  document.getElementById('nb-visiteur').textContent   = users.filter(u => u.role === 'visiteur').length;
+  document.getElementById('nb-banni').textContent      = users.filter(u => u.statut === 'banni').length;
+}
+
+function filtrerUsers(txt) {
+  txt = txt.toLowerCase().trim();
+  if (!txt) { renderUsers(ALL_USERS); return; }
+  renderUsers(ALL_USERS.filter(u =>
+    `${u.nom} ${u.prenoms} ${u.email} ${u.role}`.toLowerCase().includes(txt)
+  ));
+}
+
+function renderUsers(users) {
+  const body  = document.getElementById('tableBody');
+  const empty = document.getElementById('tableEmpty');
+  const table = document.getElementById('dataTable');
+  const count = document.getElementById('countBadge');
+  if (!users || users.length === 0) {
+    table.style.display = 'none';
+    empty.classList.remove('hidden');
+    count.textContent = '0 utilisateurs';
+    return;
+  }
+  empty.classList.add('hidden');
+  table.style.display = '';
+  count.textContent = `${users.length} utilisateur${users.length > 1 ? 's' : ''}`;
+  body.innerHTML = users.map(u => `
+    <tr>
+      <td>${u.id}</td>
+      <td><strong>${u.nom}</strong> ${u.prenoms}</td>
+      <td>${u.email}</td>
+      <td>${badge(u.role, ROLE_COLORS[u.role] || '#555')}</td>
+      <td>${badge(u.statut, STATUT_COLORS[u.statut] || '#555')}</td>
+      <td>${formatDate(u.date_inscription)}</td>
+      <td>${formatDate(u.derniere_connexion)}</td>
+      <td style="font-size:11px;color:#888">${u.ip_connexion || '—'}</td>
+      <td>
+        <select onchange="changerRole(${u.id}, this.value)"
+          style="border:1px solid #D5D8DC;border-radius:6px;padding:4px 8px;font-size:11px;">
+          <option value="">Changer rôle</option>
+          <option value="visiteur">visiteur</option>
+          <option value="etudiant">étudiant</option>
+          <option value="enseignant">enseignant</option>
+          <option value="admin">admin</option>
+        </select>
+      </td>
+    </tr>
+  `).join('');
+}
+
+async function changerRole(id, role) {
+  if (!role) return;
+  const r = await fetch(`/api/auth/role/${id}`, {
+    method: 'PATCH',
+    headers: {'Content-Type': 'application/json'},
+    body: JSON.stringify({ role })
+  });
+  if (r.ok) { alert('✅ Rôle mis à jour !'); loadUsers(); }
+  else alert('❌ Erreur lors de la mise à jour.');
+}
+
+async function ajouterDocument() {
+  const type     = document.getElementById('type_doc_add').value;
+  const code_mat = document.getElementById('code_mat_add').value.trim();
+  const folder   = document.getElementById('folder_add').value.trim();
+  const fichier  = document.getElementById('fichier_add').files[0];
+
+  if (!type || !code_mat || !folder || !fichier) {
+    showAlert('alertAjouter', 'error', '❌ Remplissez tous les champs obligatoires.');
+    return;
+  }
+
+  const fd = new FormData();
+  fd.append('type_doc', type);
+  fd.append('code_mat', code_mat);
+  fd.append('folder',   folder);
+  fd.append('fichier',  fichier);
+
+  if (type !== 'support_cours') {
+    fd.append('code_niveau', document.getElementById('code_niveau_add').value);
+    fd.append('code_annee',  document.getElementById('code_annee_add').value);
+  }
+  if (type === 'devoir') fd.append('num_dev', document.getElementById('num_dev_add').value);
+  if (type === 'examen') fd.append('session', document.getElementById('session_add').value);
+  if (type === 'td')     fd.append('sem_td',  document.getElementById('sem_td_add').value);
+
+  try {
+    const r = await fetch('/api/upload/ajouter', { method: 'POST', body: fd });
+    const d = await r.json();
+    if (r.ok) showAlert('alertAjouter', 'success', '✅ ' + d.message);
+    else      showAlert('alertAjouter', 'error',   '❌ ' + (d.detail || 'Erreur.'));
+  } catch {
+    showAlert('alertAjouter', 'error', '❌ Impossible de contacter le serveur.');
+  }
+}
+
+async function modifierDocument() {
+  const type    = document.getElementById('type_doc_mod').value;
+  const code_id = document.getElementById('code_id_mod').value.trim();
+  const folder  = document.getElementById('folder_mod').value.trim();
+  const fichier = document.getElementById('fichier_mod').files[0];
+
+  if (!type || !code_id || !folder || !fichier) {
+    showAlert('alertModifier', 'error', '❌ Remplissez tous les champs.');
+    return;
+  }
+
+  const fd = new FormData();
+  fd.append('type_doc', type);
+  fd.append('code_id',  code_id);
+  fd.append('folder',   folder);
+  fd.append('fichier',  fichier);
+
+  try {
+    const r = await fetch('/api/upload/modifier', { method: 'PATCH', body: fd });
+    const d = await r.json();
+    if (r.ok) showAlert('alertModifier', 'success', '✅ ' + d.message);
+    else      showAlert('alertModifier', 'error',   '❌ ' + (d.detail || 'Erreur.'));
+  } catch {
+    showAlert('alertModifier', 'error', '❌ Impossible de contacter le serveur.');
+  }
+}
+
+async function confirmerSuppression() {
+  const type    = document.getElementById('type_doc_sup').value;
+  const code_id = document.getElementById('code_id_sup').value.trim();
+  const path    = document.getElementById('path_sup').value.trim();
+
+  if (!type || !code_id || !path) {
+    showAlert('alertSupprimer', 'error', '❌ Remplissez tous les champs.');
+    return;
+  }
+
+  if (!confirm('⚠️ Êtes-vous sûr de vouloir supprimer ce document ?')) return;
+
+  const fd = new FormData();
+  fd.append('type_doc', type);
+  fd.append('code_id',  code_id);
+  fd.append('path',     path);
+
+  try {
+    const r = await fetch('/api/upload/supprimer', { method: 'DELETE', body: fd });
+    const d = await r.json();
+    if (r.ok) showAlert('alertSupprimer', 'success', '✅ ' + d.message);
+    else      showAlert('alertSupprimer', 'error',   '❌ ' + (d.detail || 'Erreur.'));
+  } catch {
+    showAlert('alertSupprimer', 'error', '❌ Impossible de contacter le serveur.');
+  }
+}
+
+function showAlert(id, type, msg) {
+  const el = document.getElementById(id);
+  el.className = 'form-alert form-alert-' + type;
+  el.textContent = msg;
+  el.scrollIntoView({ behavior: 'smooth', block: 'center' });
+}
+
+document.addEventListener('DOMContentLoaded', loadUsers);
+</script>
+{% endblock %}

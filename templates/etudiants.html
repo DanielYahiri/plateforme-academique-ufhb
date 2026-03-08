@@ -1,0 +1,78 @@
+{% extends "base.html" %}
+{% block title %}Étudiants Admis — Plateforme Académique{% endblock %}
+{% block nav_ref %}active{% endblock %}
+
+{% block content %}
+<div class="page-container">
+  <div class="page-header">
+    <div>
+      <h1 class="page-title">🎓  Étudiants Admis</h1>
+      <p class="page-sub">Liste des étudiants ayant obtenu leur licence</p>
+    </div>
+    <button class="btn btn-primary" onclick="loadData()"><i class="fas fa-rotate-right"></i> Actualiser</button>
+  </div>
+
+  <div class="filter-bar">
+    <div class="filter-group">
+      <label class="filter-label">Année Licence</label>
+      <select class="filter-select" data-key="p_licence_obtenue">
+        <option value="">Toutes</option>
+        <option value="2018">2018</option>
+        <option value="2019">2019</option>
+        <option value="2020">2020</option>
+        <option value="2021">2021</option>
+        <option value="2022">2022</option>
+        <option value="2023">2023</option>
+        <option value="2024">2024</option>
+        <option value="2025">2025</option>
+        <option value="2026">2026</option>
+      </select>
+    </div>
+    <div class="filter-group">
+      <label class="filter-label">Genre</label>
+      <select class="filter-select" data-key="p_genre">
+        <option value="">Tous</option>
+        <option value="M">Masculin</option>
+        <option value="F">Féminin</option>
+      </select>
+    </div>
+    <div class="filter-actions">
+  <button class="btn btn-secondary" onclick="applyFilter()"><i class="fas fa-magnifying-glass"></i> Filtrer</button>
+  <button class="btn btn-danger-outline" onclick="resetFilter()"><i class="fas fa-rotate-left"></i> Réinitialiser</button>
+</div>
+  </div>
+
+  <div class="table-toolbar">
+    <input type="text" class="search-input" id="searchInput"
+           placeholder="🔍 Rechercher dans les résultats..."
+           oninput="localSearch(this.value)">
+    <span class="count-badge" id="countBadge">0 résultats</span>
+  </div>
+
+  <div class="table-wrap">
+    <div class="table-loading" id="tableLoading">
+      <div class="spinner"></div><span>Chargement…</span>
+    </div>
+    <div id="tableEmpty" class="table-empty hidden">Aucune donnée.</div>
+    <div id="tableError" class="table-error hidden"></div>
+    <table class="data-table" id="dataTable">
+      <thead id="tableHead"></thead>
+      <tbody id="tableBody"></tbody>
+    </table>
+  </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+const API_GET  = "/api/etudiants";
+const API_POST = "/api/etudiants/filter";
+const COL_LABELS = {
+  "licence_obtenue":"Année","nbr_d_admis":"Nbre Admis",
+  "code_etudiant":"Code","nom_prenoms":"Nom & Prénoms",
+  "genre":"Genre","num_promo":"Promo",
+  "description_promo":"Description","parcours_apres_licence":"Parcours"
+};
+</script>
+<script src="/static/js/table.js"></script>
+{% endblock %}

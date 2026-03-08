@@ -1,0 +1,133 @@
+{% extends "base.html" %}
+{% block title %}Soumettre un sujet — Plateforme Académique{% endblock %}
+{% block nav_soumettre %}active{% endblock %}
+
+{% block content %}
+<div class="form-page-container">
+
+  <div class="form-hero" style="background:linear-gradient(135deg,#1A5276,#2E86C1);">
+    <h1>📤 Soumettre un sujet</h1>
+    <p>Partagez vos sujets de devoirs, examens ou TD avec la communauté universitaire.</p>
+  </div>
+
+  <div class="form-card">
+    <div id="formAlert" class="form-alert hidden"></div>
+
+    <form id="soumettreForm" onsubmit="submitSujet(event)">
+
+      <div class="form-grid-2">
+        <div class="form-group">
+          <label>Votre nom complet <span class="req">*</span></label>
+          <input type="text" name="expediteur_nom" required placeholder="Ex: Kouamé Jean">
+        </div>
+        <div class="form-group">
+          <label>Votre adresse email <span class="req">*</span></label>
+          <input type="email" name="expediteur_email" required placeholder="email@exemple.com">
+        </div>
+      </div>
+
+      <div class="form-grid-3">
+        <div class="form-group">
+          <label>Type de document <span class="req">*</span></label>
+          <select name="type_document" required>
+            <option value="">-- Choisir --</option>
+            <option value="devoir">📚 Devoir</option>
+            <option value="examen">📝 Examen</option>
+            <option value="td">📖 Travail Dirigé</option>
+            <option value="support">💾 Support de Cours</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <label>Niveau <span class="req">*</span></label>
+          <select name="niveau" required>
+            <option value="">-- Choisir --</option>
+            <option value="L1">L1 — Licence 1</option>
+            <option value="L2">L2 — Licence 2</option>
+            <option value="L3">L3 — Licence 3</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <label>Année académique</label>
+          <select name="annee">
+            <option value="">-- Optionnel --</option>
+            <option value="2024-2025">2024–2025</option>
+            <option value="2023-2024">2023–2024</option>
+            <option value="2022-2023">2022–2023</option>
+            <option value="2021-2022">2021–2022</option>
+            <option value="2020-2021">2020–2021</option>
+            <option value="2019-2020">2019–2020</option>
+            <option value="2018-2019">2018–2019</option>
+          </select>
+        </div>
+      </div>
+
+      <div class="form-group">
+        <label>Matière / UE <span class="req">*</span></label>
+        <input type="text" name="matiere" required
+               placeholder="Ex: Analyse 1, Microéconomie, Statistiques...">
+      </div>
+
+      <div class="form-group">
+        <label>Lien vers le fichier <small>(Google Drive, Dropbox…)</small></label>
+        <input type="url" name="lien_fichier" placeholder="https://drive.google.com/...">
+      </div>
+
+      <div class="form-group">
+        <label>Description du document <span class="req">*</span></label>
+        <textarea name="description" rows="4" required
+          placeholder="Décrivez brièvement le contenu du sujet (thèmes abordés, durée, barème…)"></textarea>
+      </div>
+
+      <button type="submit" class="btn btn-primary btn-lg btn-full" id="submitBtn">
+  <i class="fas fa-paper-plane"></i> Envoyer la soumission
+</button>
+
+    </form>
+  </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+async function submitSujet(e) {
+  e.preventDefault();
+  const btn   = document.getElementById('submitBtn');
+  btn.disabled = true;
+  btn.textContent = "⏳ Envoi en cours…";
+
+  const fd   = new FormData(e.target);
+  const body = Object.fromEntries(fd.entries());
+  if (!body.lien_fichier) body.lien_fichier = null;
+  if (!body.annee)        body.annee        = null;
+
+  try {
+    const r = await fetch('/api/email/sujet', {
+      method: 'POST',
+      headers: {'Content-Type': 'application/json'},
+      body: JSON.stringify(body)
+    });
+    const data = await r.json();
+    if (r.ok) {
+      showAlert('success', '✅ ' + data.message + ' Un email de confirmation vous a été envoyé.');
+      e.target.reset();
+    } else {
+      showAlert('error', '❌ ' + (data.detail || 'Erreur lors de l\'envoi.'));
+    }
+  } catch {
+    showAlert('error', '❌ Impossible de contacter le serveur.');
+  } finally {
+    btn.disabled = false;
+    btn.textContent = "📤 Envoyer la soumission";
+  }
+}
+
+function showAlert(type, msg) {
+  const el = document.getElementById('formAlert');
+  el.className = 'form-alert form-alert-' + type;
+  el.textContent = msg;
+  el.scrollIntoView({behavior: 'smooth', block: 'center'});
+}
+</script>
+{% endblock %}
+
+

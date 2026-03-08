@@ -69,8 +69,8 @@ async def envoyer_sujet(data: SoumissionSujet):
                  ("Année", data.annee or "—"), ("Lien", lien)]
         table = "".join(f'<tr style="border-bottom:1px solid #eee;"><td style="padding:9px 12px;font-weight:bold;color:#1A5276;width:35%;">{k}</td><td style="padding:9px 12px;">{v}</td></tr>' for k,v in rows)
         content = f'<p>Nouvelle soumission reçue.</p><table style="width:100%;border-collapse:collapse;">{table}</table><div style="background:#EBF5FB;border-left:4px solid #2E86C1;padding:14px;margin-top:12px;"><strong>Description :</strong><br>{data.description}</div>'
-        send_email(EMAIL_DESTINATAIRE, f"[Soumission] {types.get(data.type_document)} — {data.matiere} ({data.niveau})", wrap("Nouvelle soumission", content))
-        send_email(data.expediteur_email, f"[{APP_NAME}] Confirmation de soumission",
+        await send_email(EMAIL_DESTINATAIRE, f"[Soumission] {types.get(data.type_document)} — {data.matiere} ({data.niveau})", wrap("Nouvelle soumission", content))
+        await send_email(data.expediteur_email, f"[{APP_NAME}] Confirmation de soumission",
             wrap("Accusé de réception", f"<p>Bonjour <strong>{data.expediteur_nom}</strong>,</p><p>Votre soumission a bien été reçue. Merci !</p>"))
         return {"ok": True, "message": "Soumission envoyée avec succès !"}
     except Exception as e:
@@ -83,8 +83,8 @@ async def envoyer_feedback(data: FeedbackForm):
         rows  = [("Nom", data.nom), ("Email", data.email), ("Sujet", data.sujet), ("Note", stars)]
         table = "".join(f'<tr style="border-bottom:1px solid #eee;"><td style="padding:9px 12px;font-weight:bold;color:#1A5276;width:30%;">{k}</td><td style="padding:9px 12px;">{v}</td></tr>' for k,v in rows)
         content = f'<table style="width:100%;border-collapse:collapse;">{table}</table><div style="background:#EBF5FB;border-left:4px solid #2E86C1;padding:14px;margin-top:12px;"><strong>Message :</strong><br>{data.message}</div>'
-        send_email(EMAIL_DESTINATAIRE, f"[Feedback] {data.sujet} — {data.nom}", wrap("Nouveau feedback", content))
-        send_email(data.email, f"[{APP_NAME}] Merci pour votre feedback",
+        await send_email(EMAIL_DESTINATAIRE, f"[Feedback] {data.sujet} — {data.nom}", wrap("Nouveau feedback", content))
+        await send_email(data.email, f"[{APP_NAME}] Merci pour votre feedback",
             wrap("Feedback reçu", f"<p>Bonjour <strong>{data.nom}</strong>,</p><p>Merci pour votre retour !</p>"))
         return {"ok": True, "message": "Feedback envoyé avec succès !"}
     except Exception as e:

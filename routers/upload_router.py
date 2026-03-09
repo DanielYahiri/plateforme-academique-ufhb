@@ -1,7 +1,7 @@
 from fastapi import APIRouter, HTTPException, UploadFile, File, Form
 from typing import Optional
 import httpx
-from config import SUPABASE_URL, SUPABASE_ANON_KEY, SUPABASE_HEADERS
+from config import SUPABASE_URL, SUPABASE_ANON_KEY, SUPABASE_HEADERS,SUPABASE_SERVICE_HEADERS
 
 router = APIRouter(tags=["upload"])
 
@@ -47,7 +47,7 @@ def storage_headers():
     }
 
 def db_headers(schema: str):
-    h = SUPABASE_HEADERS.copy()
+    h = SUPABASE_SERVICE_HEADERS.copy()  # ← service key au lieu de anon
     h["Content-Profile"] = schema
     h["Prefer"] = "return=representation"
     return h

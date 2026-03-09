@@ -6,44 +6,51 @@ from email.mime.multipart import MIMEMultipart
 from email.mime.text import MIMEText
 from datetime import datetime
 from config import GMAIL_USER, GMAIL_PASSWORD, EMAIL_DESTINATAIRE, APP_NAME
-
-router = APIRouter(tags=["email"])
-
-class SoumissionSujet(BaseModel):
-    expediteur_nom:   str
-    expediteur_email: EmailStr
-    niveau:           str
-    matiere:          str
-    type_document:    str
-    annee:            Optional[str] = None
-    description:      str
-    lien_fichier:     Optional[str] = None
-
-class FeedbackForm(BaseModel):
-    nom:     str
-    email:   EmailStr
-    sujet:   str
-    message: str
-    note:    Optional[int] = None
-
 import asyncio
 from concurrent.futures import ThreadPoolExecutor
 
+router = APIRouter(tags=["email"])
+
+
+class SoumissionSujet(BaseModel):
+    expediteur_nom: str
+    expediteur_email: EmailStr
+    niveau: str
+    matiere: str
+    type_document: str
+    annee: Optional[str] = None
+    description: str
+    lien_fichier: Optional[str] = None
+
+
+class FeedbackForm(BaseModel):
+    nom: str
+    email: EmailStr
+    sujet: str
+    message: str
+    note: Optional[int] = None
+
+
 executor = ThreadPoolExecutor(max_workers=2)
+
 
 def _send_email_sync(to: str, subject: str, html_body: str):
     msg = MIMEMultipart("alternative")
     msg["Subject"] = subject
-    msg["From"]    = GMAIL_USER
-    msg["To"]      = to
+    msg["From"] = GMAIL_USER
+    msg["To"] = to
     msg.attach(MIMEText(html_body, "html", "utf-8"))
-    with smtplib.SMTP_SSL("smtp.gmail.com", 465, timeout=15) as server:
+    # Utilisation du port 465 avec SSL pour Gmail
+    with smtplib.SMTP_SSL("://gmail.com", 465, timeout=15) as server:
         server.login(GMAIL_USER, GMAIL_PASSWORD)
         server.sendmail(GMAIL_USER, to, msg.as_string())
+
 
 async def send_email(to: str, subject: str, html_body: str):
     loop = asyncio.get_event_loop()
     await loop.run_in_executor(executor, _send_email_sync, to, subject, html_body)
+
+
 def wrap(title: str, content: str) -> str:
     return f"""<!DOCTYPE html><html><head><meta charset="utf-8"></head>
 <body style="font-family:Segoe UI,Arial,sans-serif;background:#f4f6f7;padding:30px;">
@@ -58,34 +65,52 @@ def wrap(title: str, content: str) -> str:
   </div>
 </div></body></html>"""
 
+
 @router.post("/email/sujet")
 async def envoyer_sujet(data: SoumissionSujet):
     try:
-        types = {"devoir":"Devoir","examen":"Examen","td":"Travail Dirigé","support":"Support de Cours"}
-        lien  = f'<a href="{data.lien_fichier}">{data.lien_fichier}</a>' if data.lien_fichier else "<em>Aucun</em>"
-        rows  = [("Expéditeur", data.expediteur_nom), ("Email", data.expediteur_email),
-                 ("Type", types.get(data.type_document, data.type_document)),
-                 ("Niveau", data.niveau), ("Matière", data.matiere),
-                 ("Année", data.annee or "—"), ("Lien", lien)]
-        table = "".join(f'<tr style="border-bottom:1px solid #eee;"><td style="padding:9px 12px;font-weight:bold;color:#1A5276;width:35%;">{k}</td><td style="padding:9px 12px;">{v}</td></tr>' for k,v in rows)
+        types = {"devoir": "Devoir", "examen": "Examen", "td": "Travail Dirigé", "support": "Support de Cours"}
+        lien = f'<a href="{data.lien_fichier}">{data.lien_fichier}</a>' if data.lien_fichier else "<em>Aucun</em>"
+        rows = [("Expéditeur", data.expediteur_nom), ("Email", data.expediteur_email),
+                ("Type", types.get(data.type_document, data.type_document)),
+                ("Niveau", data.niveau), ("Matière", data.matiere),
+                ("Année", data.annee or "—"), ("Lien", lien)]
+        table = "".join(
+            f'<tr style="border-bottom:1px solid #eee;"><td style="padding:9px 12px;font-weight:bold;color:#1A5276;width:35%;">{k}</td><td style="padding:9px 12px;">{v}</td></tr>'
+            for k, v in rows)
         content = f'<p>Nouvelle soumission reçue.</p><table style="width:100%;border-collapse:collapse;">{table}</table><div style="background:#EBF5FB;border-left:4px solid #2E86C1;padding:14px;margin-top:12px;"><strong>Description :</strong><br>{data.description}</div>'
-        await send_email(EMAIL_DESTINATAIRE, f"[Soumission] {types.get(data.type_document)} — {data.matiere} ({data.niveau})", wrap("Nouvelle soumission", content))
+
+        # Envoi des emails avec await
+        await send_email(EMAIL_DESTINATAIRE,
+                         f"[Soumission] {types.get(data.type_document)} — {data.matiere} ({data.niveau})",
+                         wrap("Nouvelle soumission", content))
         await send_email(data.expediteur_email, f"[{APP_NAME}] Confirmation de soumission",
-            wrap("Accusé de réception", f"<p>Bonjour <strong>{data.expediteur_nom}</strong>,</p><p>Votre soumission a bien été reçue. Merci !</p>"))
+                         wrap("Accusé de réception",
+                              f"<p>Bonjour <strong>{data.expediteur_nom}</strong>,</p><p>Votre soumission a bien été reçue. Merci !</p>"))
+
         return {"ok": True, "message": "Soumission envoyée avec succès !"}
     except Exception as e:
+        print(f"ERREUR D'ENVOI (SUJET): {e}")  # Pour voir l'erreur dans les logs Render
         raise HTTPException(status_code=500, detail=str(e))
+
 
 @router.post("/email/feedback")
 async def envoyer_feedback(data: FeedbackForm):
     try:
         stars = "⭐" * (data.note or 0) or "Non renseigné"
-        rows  = [("Nom", data.nom), ("Email", data.email), ("Sujet", data.sujet), ("Note", stars)]
-        table = "".join(f'<tr style="border-bottom:1px solid #eee;"><td style="padding:9px 12px;font-weight:bold;color:#1A5276;width:30%;">{k}</td><td style="padding:9px 12px;">{v}</td></tr>' for k,v in rows)
+        rows = [("Nom", data.nom), ("Email", data.email), ("Sujet", data.sujet), ("Note", stars)]
+        table = "".join(
+            f'<tr style="border-bottom:1px solid #eee;"><td style="padding:9px 12px;font-weight:bold;color:#1A5276;width:30%;">{k}</td><td style="padding:9px 12px;">{v}</td></tr>'
+            for k, v in rows)
         content = f'<table style="width:100%;border-collapse:collapse;">{table}</table><div style="background:#EBF5FB;border-left:4px solid #2E86C1;padding:14px;margin-top:12px;"><strong>Message :</strong><br>{data.message}</div>'
+
+        # Envoi des emails avec await (Bien indentés dans le bloc try)
         await send_email(EMAIL_DESTINATAIRE, f"[Feedback] {data.sujet} — {data.nom}", wrap("Nouveau feedback", content))
         await send_email(data.email, f"[{APP_NAME}] Merci pour votre feedback",
-            wrap("Feedback reçu", f"<p>Bonjour <strong>{data.nom}</strong>,</p><p>Merci pour votre retour !</p>"))
+                         wrap("Feedback reçu",
+                              f"<p>Bonjour <strong>{data.nom}</strong>,</p><p>Merci pour votre retour !</p>"))
+
         return {"ok": True, "message": "Feedback envoyé avec succès !"}
     except Exception as e:
+        print(f"ERREUR D'ENVOI (FEEDBACK): {e}")  # Pour voir l'erreur dans les logs Render
         raise HTTPException(status_code=500, detail=str(e))

@@ -8,57 +8,88 @@
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
-  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
 </head>
 <body>
 
 <nav class="navbar">
   <div class="nav-brand" onclick="location.href='/'">
     <svg width="36" height="36" viewBox="0 0 36 36" fill="none" xmlns="http://www.w3.org/2000/svg">
-  <circle cx="18" cy="18" r="18" fill="#F39C12"/>
-  <path d="M18 8 L28 13 L18 18 L8 13 Z" fill="white"/>
-  <path d="M12 15.5 L12 22 Q18 25 24 22 L24 15.5 L18 18.5 Z" fill="white" opacity="0.85"/>
-  <rect x="26" y="13" width="2" height="7" rx="1" fill="white"/>
-  <circle cx="27" cy="21" r="1.5" fill="white"/>
-</svg>
+      <circle cx="18" cy="18" r="18" fill="#F39C12"/>
+      <path d="M18 8 L28 13 L18 18 L8 13 Z" fill="white"/>
+      <path d="M12 15.5 L12 22 Q18 25 24 22 L24 15.5 L18 18.5 Z" fill="white" opacity="0.85"/>
+      <rect x="26" y="13" width="2" height="7" rx="1" fill="white"/>
+      <circle cx="27" cy="21" r="1.5" fill="white"/>
+    </svg>
     <div>
       <span class="nav-title">Classe Etoile</span>
       <span class="nav-sub">UFHB</span>
     </div>
   </div>
+
   <button class="burger" onclick="toggleMenu()">
-  <span></span>
-  <span></span>
-  <span></span>
-</button>
-<ul class="nav-links" id="navLinks">
-  <li><a href="/" class="nav-item {% block nav_home %}{% endblock %}"><i class="fas fa-house"></i> Accueil</a></li>
-  <li class="nav-dropdown">
-    <a class="nav-item {% block nav_academic %}{% endblock %}"><i class="fas fa-book-open"></i> Académique ▾</a>
-    <ul class="dropdown-menu">
-      <li><a href="/devoirs"><i class="fas fa-book"></i> Devoirs</a></li>
-      <li><a href="/examens"><i class="fas fa-file-alt"></i> Examens</a></li>
-      <li><a href="/td"><i class="fas fa-chalkboard-teacher"></i> Travaux Dirigés</a></li>
-      <li><a href="/supports"><i class="fas fa-folder-open"></i> Supports de Cours</a></li>
-    </ul>
-  </li>
-  <li class="nav-dropdown">
-    <a class="nav-item {% block nav_ref %}{% endblock %}"><i class="fas fa-database"></i> Référentiel ▾</a>
-    <ul class="dropdown-menu">
-      <li><a href="/matieres"><i class="fas fa-list"></i> Matières (UE)</a></li>
-      <li><a href="/etudiants"><i class="fas fa-user-graduate"></i> Étudiants Admis</a></li>
-      <li><a href="/promotions"><i class="fas fa-chart-bar"></i> Promotions</a></li>
-      <li><a href="/acces"><i class="fas fa-key"></i> Conditions d'Accès</a></li>
-    </ul>
-  </li>
-  <li><a href="/soumettre" class="nav-item nav-cta {% block nav_soumettre %}{% endblock %}"><i class="fas fa-upload"></i> Soumettre</a></li>
-  <li><a href="/feedback" class="nav-item {% block nav_feedback %}{% endblock %}"><i class="fas fa-comment-dots"></i> Feedback</a></li>
-  <li><a href="/inscription" class="nav-item {% block nav_inscription %}{% endblock %}"><i class="fas fa-user-plus"></i> Inscription</a></li>
-  <li><a href="/connexion" class="nav-item {% block nav_connexion %}{% endblock %}"><i class="fas fa-right-to-bracket"></i> Connexion</a></li>
-  <li id="nav-admin-link">
-  <a href="/dashboard-admin" class="nav-item"><i class="fas fa-users-gear"></i> Admin</a>
-</li>
-</ul>
+    <span></span>
+    <span></span>
+    <span></span>
+  </button>
+
+  <ul class="nav-links" id="navLinks">
+    <li><a href="/" class="nav-item {% block nav_home %}{% endblock %}"><i class="fas fa-house"></i> Accueil</a></li>
+
+    <li class="nav-dropdown">
+      <a class="nav-item {% block nav_academic %}{% endblock %}"><i class="fas fa-book-open"></i> Académique ▾</a>
+      <ul class="dropdown-menu">
+        <li><a href="/devoirs"><i class="fas fa-book"></i> Devoirs</a></li>
+        <li><a href="/examens"><i class="fas fa-file-alt"></i> Examens</a></li>
+        <li><a href="/td"><i class="fas fa-chalkboard-teacher"></i> Travaux Dirigés</a></li>
+        <li><a href="/supports"><i class="fas fa-folder-open"></i> Supports de Cours</a></li>
+      </ul>
+    </li>
+
+    <li class="nav-dropdown">
+      <a class="nav-item {% block nav_ref %}{% endblock %}"><i class="fas fa-database"></i> Référentiel ▾</a>
+      <ul class="dropdown-menu">
+        <li><a href="/matieres"><i class="fas fa-list"></i> Matières (UE)</a></li>
+        <li><a href="/etudiants"><i class="fas fa-user-graduate"></i> Étudiants Admis</a></li>
+        <li><a href="/promotions"><i class="fas fa-chart-bar"></i> Promotions</a></li>
+        <li><a href="/acces"><i class="fas fa-key"></i> Conditions d'Accès</a></li>
+      </ul>
+    </li>
+
+    <li><a href="/soumettre" class="nav-item nav-cta {% block nav_soumettre %}{% endblock %}"><i class="fas fa-upload"></i> Soumettre</a></li>
+    <li><a href="/feedback" class="nav-item {% block nav_feedback %}{% endblock %}"><i class="fas fa-comment-dots"></i> Feedback</a></li>
+
+    <!-- NON CONNECTÉ : Inscription + Connexion -->
+    <li id="nav-inscription" style="display:none;">
+      <a href="/inscription" class="nav-item {% block nav_inscription %}{% endblock %}">
+        <i class="fas fa-user-plus"></i> Inscription
+      </a>
+    </li>
+    <li id="nav-connexion" style="display:none;">
+      <a href="/connexion" class="nav-item {% block nav_connexion %}{% endblock %}">
+        <i class="fas fa-right-to-bracket"></i> Connexion
+      </a>
+    </li>
+
+    <!-- CONNECTÉ : Profil dropdown -->
+    <li id="nav-profil" class="nav-dropdown" style="display:none;">
+      <a class="nav-item nav-profil-btn">
+        <i class="fas fa-user-tie"></i>
+        <span id="nav-user-name">Mon compte</span> ▾
+      </a>
+      <ul class="dropdown-menu">
+        <!-- Visible uniquement pour les admins -->
+        <li id="nav-admin-link" style="display:none;">
+          <a href="/dashboard-admin"><i class="fas fa-users-gear"></i> Admin</a>
+        </li>
+        <li>
+          <a href="#" onclick="deconnexion(event)">
+            <i class="fas fa-right-from-bracket"></i> Se déconnecter
+          </a>
+        </li>
+      </ul>
+    </li>
+
+  </ul>
 </nav>
 
 <main class="main-content">
@@ -69,9 +100,9 @@
   <div class="footer-inner">
     <div>
       <span class="footer-brand">
-  <img src="/static/img/logo_ufhb.png" style="height:36px;width:36px;border-radius:50%;object-fit:cover;">
-  Plateforme Académique
-</span>
+        <img src="/static/img/logo_ufhb.png" style="height:36px;width:36px;border-radius:50%;object-fit:cover;">
+        Plateforme Académique
+      </span>
       <p class="footer-sub">Université Félix Houphouët-Boigny · Côte d'Ivoire</p>
     </div>
     <div class="footer-links">
@@ -85,6 +116,57 @@
 </footer>
 
 <script src="/static/js/app.js"></script>
+
+<script>
+// ── NAVBAR DYNAMIQUE ──────────────────────────────────────────────────────────
+document.addEventListener("DOMContentLoaded", () => {
+  let user = null;
+  try { user = JSON.parse(localStorage.getItem("user")); } catch {}
+
+  const elInscription = document.getElementById("nav-inscription");
+  const elConnexion   = document.getElementById("nav-connexion");
+  const elProfil      = document.getElementById("nav-profil");
+  const elAdmin       = document.getElementById("nav-admin-link");
+  const elUserName    = document.getElementById("nav-user-name");
+
+  if (user) {
+    // Connecté : afficher profil, cacher inscription/connexion
+    elInscription.style.display = "none";
+    elConnexion.style.display   = "none";
+    elProfil.style.display      = "list-item";
+
+    // Afficher le prénom, nom ou email selon ce qui est disponible
+    const label = user.prenom || user.nom || user.email || "Mon compte";
+    elUserName.textContent = label;
+
+    // Afficher le lien Admin uniquement si role === "admin"
+    if (user.role === "admin" && elAdmin) {
+      elAdmin.style.display = "list-item";
+    }
+
+  } else {
+    // Non connecté : afficher inscription/connexion, cacher profil
+    elInscription.style.display = "list-item";
+    elConnexion.style.display   = "list-item";
+    elProfil.style.display      = "none";
+  }
+});
+
+// ── DÉCONNEXION ───────────────────────────────────────────────────────────────
+function deconnexion(e) {
+  e.preventDefault();
+  // Effacer localStorage et sessionStorage
+  localStorage.removeItem("user");
+  sessionStorage.removeItem("redirect_after_login");
+  // Effacer les cookies user_role et user_id
+  document.cookie = "user_role=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/;";
+  document.cookie = "user_id=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/;";
+  // Rediriger vers connexion
+  window.location.href = "/connexion";
+}
+// ─────────────────────────────────────────────────────────────────────────────
+</script>
+
 {% block scripts %}{% endblock %}
 </body>
 </html>

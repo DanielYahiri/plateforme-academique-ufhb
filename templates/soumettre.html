@@ -27,16 +27,34 @@
       </div>
 
       <div class="form-grid-3">
+
+        <!-- DROPDOWN CUSTOM TYPE DOCUMENT -->
         <div class="form-group">
           <label>Type de document <span class="req">*</span></label>
-          <select name="type_document" required>
-            <option value="">-- Choisir --</option>
-            <option value="devoir">📚 Devoir</option>
-            <option value="examen">📝 Examen</option>
-            <option value="td">📖 Travail Dirigé</option>
-            <option value="support">💾 Support de Cours</option>
-          </select>
+          <input type="hidden" name="type_document" id="typeDocInput" required>
+          <div class="custom-select" id="customSelectDoc">
+            <div class="custom-select-trigger" onclick="toggleDropdown('customSelectDoc')">
+              <span id="customSelectDocLabel" style="color:#999;">-- Choisir --</span>
+              <i class="fas fa-chevron-down custom-select-arrow"></i>
+            </div>
+            <ul class="custom-select-menu">
+              <li onclick="selectOption('devoir', 'Type de document', 'typeDocInput', 'customSelectDocLabel', 'customSelectDoc', this)">
+                <i class="fas fa-book"></i> Devoir
+              </li>
+              <li onclick="selectOption('examen', 'Type de document', 'typeDocInput', 'customSelectDocLabel', 'customSelectDoc', this)">
+                <i class="fas fa-file-alt"></i> Examen
+              </li>
+              <li onclick="selectOption('td', 'Type de document', 'typeDocInput', 'customSelectDocLabel', 'customSelectDoc', this)">
+                <i class="fas fa-chalkboard-teacher"></i> Travail Dirigé
+              </li>
+              <li onclick="selectOption('support', 'Type de document', 'typeDocInput', 'customSelectDocLabel', 'customSelectDoc', this)">
+                <i class="fas fa-folder-open"></i> Support de Cours
+              </li>
+            </ul>
+          </div>
         </div>
+        <!-- FIN DROPDOWN CUSTOM TYPE DOCUMENT -->
+
         <div class="form-group">
           <label>Niveau <span class="req">*</span></label>
           <select name="niveau" required>
@@ -46,10 +64,12 @@
             <option value="L3">L3 — Licence 3</option>
           </select>
         </div>
+
         <div class="form-group">
           <label>Année académique</label>
           <select name="annee">
             <option value="">-- Optionnel --</option>
+            <option value="2025-2026">2025–2026</option>
             <option value="2024-2025">2024–2025</option>
             <option value="2023-2024">2023–2024</option>
             <option value="2022-2023">2022–2023</option>
@@ -59,6 +79,7 @@
             <option value="2018-2019">2018–2019</option>
           </select>
         </div>
+
       </div>
 
       <div class="form-group">
@@ -79,21 +100,146 @@
       </div>
 
       <button type="submit" class="btn btn-primary btn-lg btn-full" id="submitBtn">
-  <i class="fas fa-paper-plane"></i> Envoyer la soumission
-</button>
+        <i class="fas fa-paper-plane"></i> Envoyer la soumission
+      </button>
 
     </form>
   </div>
 </div>
+
+<!-- STYLES DROPDOWN CUSTOM -->
+<style>
+.custom-select {
+  position: relative;
+  user-select: none;
+}
+.custom-select-trigger {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 10px 14px;
+  border: 1px solid #D0D8E4;
+  border-radius: 8px;
+  background: #fff;
+  cursor: pointer;
+  font-size: 14px;
+  color: #2D3748;
+  transition: border-color 0.2s;
+}
+.custom-select-trigger:hover {
+  border-color: #2E86C1;
+}
+.custom-select.open .custom-select-trigger {
+  border-color: #2E86C1;
+  box-shadow: 0 0 0 3px rgba(46,134,193,0.15);
+}
+.custom-select-arrow {
+  font-size: 12px;
+  color: #718096;
+  transition: transform 0.2s;
+}
+.custom-select.open .custom-select-arrow {
+  transform: rotate(180deg);
+}
+.custom-select-menu {
+  display: none;
+  position: absolute;
+  top: calc(100% + 4px);
+  left: 0;
+  right: 0;
+  background: #fff;
+  border: 1px solid #D0D8E4;
+  border-radius: 8px;
+  box-shadow: 0 8px 24px rgba(0,0,0,0.1);
+  z-index: 100;
+  list-style: none;
+  padding: 6px 0;
+  margin: 0;
+}
+.custom-select.open .custom-select-menu {
+  display: block;
+}
+.custom-select-menu li {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 10px 16px;
+  font-size: 14px;
+  color: #2D3748;
+  cursor: pointer;
+  transition: background 0.15s;
+}
+.custom-select-menu li:hover {
+  background: #EBF2FA;
+  color: #2E86C1;
+}
+.custom-select-menu li.selected {
+  background: #EBF2FA;
+  color: #2E86C1;
+  font-weight: 600;
+}
+.custom-select-menu li i {
+  width: 16px;
+  text-align: center;
+  color: #2E86C1;
+}
+</style>
 {% endblock %}
 
 {% block scripts %}
 <script>
+// ── PROTECTION ACCÈS ──────────────────────────────────────
+(function () {
+  try {
+    const user = JSON.parse(localStorage.getItem("user"));
+    if (!user) {
+      sessionStorage.setItem("redirect_after_login", window.location.pathname);
+      window.location.replace("/connexion?message=connexion_requise");
+    }
+  } catch {
+    sessionStorage.setItem("redirect_after_login", window.location.pathname);
+    window.location.replace("/connexion?message=connexion_requise");
+  }
+})();
+// ─────────────────────────────────────────────────────────
+
+// ── DROPDOWN CUSTOM ───────────────────────────────────────
+function toggleDropdown(id) {
+  document.getElementById(id).classList.toggle("open");
+}
+
+function selectOption(value, placeholder, inputId, labelId, selectId, el) {
+  document.getElementById(inputId).value = value;
+  const label = document.getElementById(labelId);
+  label.textContent = el.textContent.trim();
+  label.style.color = "#2D3748";
+  document.querySelectorAll("#" + selectId + " .custom-select-menu li")
+    .forEach(li => li.classList.remove("selected"));
+  el.classList.add("selected");
+  document.getElementById(selectId).classList.remove("open");
+}
+
+// Fermer les dropdowns si on clique ailleurs
+document.addEventListener("click", (e) => {
+  ["customSelectDoc"].forEach(id => {
+    const el = document.getElementById(id);
+    if (el && !el.contains(e.target)) el.classList.remove("open");
+  });
+});
+// ─────────────────────────────────────────────────────────
+
 async function submitSujet(e) {
   e.preventDefault();
-  const btn   = document.getElementById('submitBtn');
+
+  // Vérifier que le type de document est sélectionné
+  if (!document.getElementById("typeDocInput").value) {
+    showAlert('error', '❌ Veuillez sélectionner un type de document.');
+    return;
+  }
+
+  const btn = document.getElementById('submitBtn');
   btn.disabled = true;
-  btn.textContent = "⏳ Envoi en cours…";
+  btn.innerHTML = "⏳ Envoi en cours…";
 
   const fd   = new FormData(e.target);
   const body = Object.fromEntries(fd.entries());
@@ -110,6 +256,11 @@ async function submitSujet(e) {
     if (r.ok) {
       showAlert('success', '✅ ' + data.message + ' Un email de confirmation vous a été envoyé.');
       e.target.reset();
+      // Réinitialiser le dropdown custom
+      document.getElementById("typeDocInput").value = "";
+      document.getElementById("customSelectDocLabel").textContent = "-- Choisir --";
+      document.getElementById("customSelectDocLabel").style.color = "#999";
+      document.querySelectorAll(".custom-select-menu li").forEach(li => li.classList.remove("selected"));
     } else {
       showAlert('error', '❌ ' + (data.detail || 'Erreur lors de l\'envoi.'));
     }
@@ -117,7 +268,7 @@ async function submitSujet(e) {
     showAlert('error', '❌ Impossible de contacter le serveur.');
   } finally {
     btn.disabled = false;
-    btn.textContent = "📤 Envoyer la soumission";
+    btn.innerHTML = '<i class="fas fa-paper-plane"></i> Envoyer la soumission';
   }
 }
 

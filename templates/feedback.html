@@ -37,17 +37,36 @@
         </div>
       </div>
 
+      <!-- DROPDOWN CUSTOM SUJET -->
       <div class="form-group">
         <label>Sujet <span class="req">*</span></label>
-        <select name="sujet" required>
-          <option value="">-- Type de feedback --</option>
-          <option value="Signalement d'erreur">🐛 Signalement d'erreur</option>
-          <option value="Suggestion d'amélioration">💡 Suggestion d'amélioration</option>
-          <option value="Problème de connexion">🔌 Problème de connexion</option>
-          <option value="Données incorrectes">📊 Données incorrectes</option>
-          <option value="Autre">💬 Autre</option>
-        </select>
+        <input type="hidden" name="sujet" id="sujetInput" required>
+
+        <div class="custom-select" id="customSelect">
+          <div class="custom-select-trigger" onclick="toggleDropdown()">
+            <span id="customSelectLabel" style="color:#999;">-- Type de feedback --</span>
+            <i class="fas fa-chevron-down custom-select-arrow" id="selectArrow"></i>
+          </div>
+          <ul class="custom-select-menu" id="customSelectMenu">
+            <li onclick="selectOption('Signalement d\'erreur', this)">
+              <i class="fas fa-triangle-exclamation"></i> Signalement d'erreur
+            </li>
+            <li onclick="selectOption('Suggestion d\'amélioration', this)">
+              <i class="fas fa-lightbulb"></i> Suggestion d'amélioration
+            </li>
+            <li onclick="selectOption('Problème de connexion', this)">
+              <i class="fas fa-lock"></i> Problème de connexion
+            </li>
+            <li onclick="selectOption('Données incorrectes', this)">
+              <i class="fas fa-circle-xmark"></i> Données incorrectes
+            </li>
+            <li onclick="selectOption('Autre', this)">
+              <i class="fas fa-bars"></i> Autre
+            </li>
+          </ul>
+        </div>
       </div>
+      <!-- FIN DROPDOWN CUSTOM -->
 
       <div class="form-group">
         <label>Message <span class="req">*</span></label>
@@ -56,15 +75,129 @@
       </div>
 
       <button type="submit" class="btn btn-success btn-lg btn-full" id="submitBtn">
-  <i class="fas fa-comment-dots"></i> Envoyer le feedback
-</button>
+        <i class="fas fa-comment-dots"></i> Envoyer le feedback
+      </button>
     </form>
   </div>
 </div>
+
+<!-- STYLES DROPDOWN CUSTOM -->
+<style>
+.custom-select {
+  position: relative;
+  user-select: none;
+}
+.custom-select-trigger {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 10px 14px;
+  border: 1px solid #D0D8E4;
+  border-radius: 8px;
+  background: #fff;
+  cursor: pointer;
+  font-size: 14px;
+  color: #2D3748;
+  transition: border-color 0.2s;
+}
+.custom-select-trigger:hover {
+  border-color: #2E86C1;
+}
+.custom-select.open .custom-select-trigger {
+  border-color: #2E86C1;
+  box-shadow: 0 0 0 3px rgba(46,134,193,0.15);
+}
+.custom-select-arrow {
+  font-size: 12px;
+  color: #718096;
+  transition: transform 0.2s;
+}
+.custom-select.open .custom-select-arrow {
+  transform: rotate(180deg);
+}
+.custom-select-menu {
+  display: none;
+  position: absolute;
+  top: calc(100% + 4px);
+  left: 0;
+  right: 0;
+  background: #fff;
+  border: 1px solid #D0D8E4;
+  border-radius: 8px;
+  box-shadow: 0 8px 24px rgba(0,0,0,0.1);
+  z-index: 100;
+  list-style: none;
+  padding: 6px 0;
+  margin: 0;
+}
+.custom-select.open .custom-select-menu {
+  display: block;
+}
+.custom-select-menu li {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 10px 16px;
+  font-size: 14px;
+  color: #2D3748;
+  cursor: pointer;
+  transition: background 0.15s;
+}
+.custom-select-menu li:hover {
+  background: #EBF2FA;
+  color: #2E86C1;
+}
+.custom-select-menu li.selected {
+  background: #EBF2FA;
+  color: #2E86C1;
+  font-weight: 600;
+}
+.custom-select-menu li i {
+  width: 16px;
+  text-align: center;
+  color: #2E86C1;
+}
+</style>
 {% endblock %}
 
 {% block scripts %}
 <script>
+// ── PROTECTION ACCÈS ──────────────────────────────────────
+(function () {
+  try {
+    const user = JSON.parse(localStorage.getItem("user"));
+    if (!user) {
+      sessionStorage.setItem("redirect_after_login", window.location.pathname);
+      window.location.replace("/connexion?message=connexion_requise");
+    }
+  } catch {
+    sessionStorage.setItem("redirect_after_login", window.location.pathname);
+    window.location.replace("/connexion?message=connexion_requise");
+  }
+})();
+// ─────────────────────────────────────────────────────────
+
+// ── DROPDOWN CUSTOM ───────────────────────────────────────
+function toggleDropdown() {
+  document.getElementById("customSelect").classList.toggle("open");
+}
+
+function selectOption(value, el) {
+  document.getElementById("sujetInput").value = value;
+  document.getElementById("customSelectLabel").textContent = el.textContent.trim();
+  document.getElementById("customSelectLabel").style.color = "#2D3748";
+  document.querySelectorAll(".custom-select-menu li").forEach(li => li.classList.remove("selected"));
+  el.classList.add("selected");
+  document.getElementById("customSelect").classList.remove("open");
+}
+
+// Fermer le dropdown si on clique ailleurs
+document.addEventListener("click", (e) => {
+  const cs = document.getElementById("customSelect");
+  if (cs && !cs.contains(e.target)) cs.classList.remove("open");
+});
+// ─────────────────────────────────────────────────────────
+
 let currentNote = null;
 
 function setNote(val) {
@@ -77,6 +210,13 @@ function setNote(val) {
 
 async function submitFeedback(e) {
   e.preventDefault();
+
+  // Vérifier que le sujet est sélectionné
+  if (!document.getElementById("sujetInput").value) {
+    showAlert('error', '❌ Veuillez sélectionner un type de feedback.');
+    return;
+  }
+
   const btn = document.getElementById('submitBtn');
   btn.disabled = true;
   btn.textContent = "⏳ Envoi en cours…";
@@ -96,6 +236,11 @@ async function submitFeedback(e) {
       showAlert('success', '✅ ' + data.message);
       e.target.reset();
       setNote(0);
+      // Réinitialiser le dropdown custom
+      document.getElementById("sujetInput").value = "";
+      document.getElementById("customSelectLabel").textContent = "-- Type de feedback --";
+      document.getElementById("customSelectLabel").style.color = "#999";
+      document.querySelectorAll(".custom-select-menu li").forEach(li => li.classList.remove("selected"));
     } else {
       showAlert('error', '❌ ' + (data.detail || 'Erreur.'));
     }
@@ -103,7 +248,7 @@ async function submitFeedback(e) {
     showAlert('error', '❌ Impossible de contacter le serveur.');
   } finally {
     btn.disabled = false;
-    btn.textContent = "💬 Envoyer le feedback";
+    btn.innerHTML = '<i class="fas fa-comment-dots"></i> Envoyer le feedback';
   }
 }
 

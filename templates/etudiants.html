@@ -37,9 +37,9 @@
       </select>
     </div>
     <div class="filter-actions">
-  <button class="btn btn-secondary" onclick="applyFilter()"><i class="fas fa-magnifying-glass"></i> Filtrer</button>
-  <button class="btn btn-danger-outline" onclick="resetFilter()"><i class="fas fa-rotate-left"></i> Réinitialiser</button>
-</div>
+      <button class="btn btn-secondary" onclick="applyFilter()"><i class="fas fa-magnifying-glass"></i> Filtrer</button>
+      <button class="btn btn-danger-outline" onclick="resetFilter()"><i class="fas fa-rotate-left"></i> Réinitialiser</button>
+    </div>
   </div>
 
   <div class="table-toolbar">
@@ -65,6 +65,21 @@
 
 {% block scripts %}
 <script>
+// ── PROTECTION ACCÈS ──────────────────────────────────────
+(function () {
+  try {
+    const user = JSON.parse(localStorage.getItem("user"));
+    if (!user) {
+      sessionStorage.setItem("redirect_after_login", window.location.pathname);
+      window.location.replace("/connexion?message=connexion_requise");
+    }
+  } catch {
+    sessionStorage.setItem("redirect_after_login", window.location.pathname);
+    window.location.replace("/connexion?message=connexion_requise");
+  }
+})();
+// ─────────────────────────────────────────────────────────
+
 const API_GET  = "/api/etudiants";
 const API_POST = "/api/etudiants/filter";
 const COL_LABELS = {

@@ -39,6 +39,21 @@
 
 {% block scripts %}
 <script>
+// ── PROTECTION ACCÈS ──────────────────────────────────────
+(function () {
+  try {
+    const user = JSON.parse(localStorage.getItem("user"));
+    if (!user) {
+      sessionStorage.setItem("redirect_after_login", window.location.pathname);
+      window.location.replace("/connexion?message=connexion_requise");
+    }
+  } catch {
+    sessionStorage.setItem("redirect_after_login", window.location.pathname);
+    window.location.replace("/connexion?message=connexion_requise");
+  }
+})();
+// ─────────────────────────────────────────────────────────
+
 const API_GET  = "/api/acces";
 const API_POST = null;
 const COL_LABELS = {

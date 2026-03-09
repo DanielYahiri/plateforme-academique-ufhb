@@ -70,24 +70,23 @@
       </a>
     </li>
 
-    <!-- CONNECTÉ : Profil dropdown -->
-    <li id="nav-profil" class="nav-dropdown" style="display:none;">
-      <a class="nav-item nav-profil-btn">
-        <i class="fas fa-user-tie"></i>
-        <span id="nav-user-name">Mon compte</span> ▾
-      </a>
-      <ul class="dropdown-menu">
-        <!-- Visible uniquement pour les admins -->
-        <li id="nav-admin-link" style="display:none;">
-          <a href="/dashboard-admin"><i class="fas fa-users-gear"></i> Admin</a>
-        </li>
-        <li>
-          <a href="#" onclick="deconnexion(event)">
-            <i class="fas fa-right-from-bracket"></i> Se déconnecter
-          </a>
-        </li>
-      </ul>
+   <!-- CONNECTÉ : Profil dropdown -->
+<li id="nav-profil" class="nav-dropdown" style="display:none;">
+  <a class="nav-item nav-profil-btn">
+    <i class="fas fa-user-tie"></i>
+    <span id="nav-user-name">Mon compte</span> ▾
+  </a>
+  <ul class="dropdown-menu">
+    <li id="nav-admin-link" style="display:none;">
+      <a href="/dashboard-admin"><i class="fas fa-users-gear"></i> Admin</a>
     </li>
+    <li>
+      <a href="#" onclick="deconnexion(event)">
+        <i class="fas fa-right-from-bracket"></i> Se déconnecter
+      </a>
+    </li>
+  </ul>
+</li>
 
   </ul>
 </nav>

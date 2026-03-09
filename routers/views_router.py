@@ -56,6 +56,10 @@ async def inscription(request: Request):
 async def connexion(request: Request):
     return templates.TemplateResponse("connexion.html", {"request": request})
 
+@router.get("/profil")
+async def profil(request: Request):
+    return templates.TemplateResponse("profil.html", {"request": request})
+
 @router.get("/dashboard-admin")
 async def dashboard_admin(request: Request):
     user = request.cookies.get("user_role")

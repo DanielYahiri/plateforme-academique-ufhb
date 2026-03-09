@@ -1,0 +1,248 @@
+{% extends "base.html" %}
+{% block title %}Mon Profil — Plateforme Académique{% endblock %}
+
+{% block content %}
+<div class="form-page-container">
+
+  <div class="form-hero" style="background:linear-gradient(135deg,#1A5276,#2E86C1);">
+    <h1><i class="fas fa-user-tie"></i> Mon Profil</h1>
+    <p>Consultez et modifiez vos informations personnelles.</p>
+  </div>
+
+  <div class="form-card">
+    <div id="formAlert" class="form-alert hidden"></div>
+
+    <!-- INFOS ACTUELLES -->
+    <div class="profil-info-bar" id="profilInfoBar">
+      <div class="profil-avatar">
+        <i class="fas fa-user-tie"></i>
+      </div>
+      <div class="profil-details">
+        <p class="profil-name" id="profilName">—</p>
+        <p class="profil-email" id="profilEmail">—</p>
+        <span class="profil-role" id="profilRole">—</span>
+      </div>
+    </div>
+
+    <hr style="border:none;border-top:1px solid #EDF2F7;margin:24px 0;">
+
+    <!-- FORMULAIRE MODIFICATION -->
+    <form id="profilForm" onsubmit="submitProfil(event)">
+
+      <div class="form-grid-2">
+        <div class="form-group">
+          <label>Nom <span class="req">*</span></label>
+          <input type="text" name="nom" id="inputNom" placeholder="Votre nom">
+        </div>
+        <div class="form-group">
+          <label>Prénoms <span class="req">*</span></label>
+          <input type="text" name="prenoms" id="inputPrenoms" placeholder="Vos prénoms">
+        </div>
+      </div>
+
+      <div class="form-group">
+        <label>Adresse email <span class="req">*</span></label>
+        <input type="email" name="email" id="inputEmail" placeholder="email@exemple.com">
+      </div>
+
+      <hr style="border:none;border-top:1px solid #EDF2F7;margin:20px 0;">
+      <p style="font-size:13px;color:#718096;margin-bottom:16px;">
+        <i class="fas fa-lock"></i> Laissez vide si vous ne souhaitez pas changer votre mot de passe.
+      </p>
+
+      <div class="form-group">
+        <label>Ancien mot de passe</label>
+        <input type="password" name="ancien_mot_de_passe" id="inputAncienMdp"
+               placeholder="Requis pour changer le mot de passe">
+      </div>
+
+      <div class="form-grid-2">
+        <div class="form-group">
+          <label>Nouveau mot de passe</label>
+          <input type="password" name="mot_de_passe" id="inputNouveauMdp"
+                 placeholder="Nouveau mot de passe">
+        </div>
+        <div class="form-group">
+          <label>Confirmer le mot de passe</label>
+          <input type="password" id="inputConfirmMdp"
+                 placeholder="Confirmer le nouveau mot de passe">
+        </div>
+      </div>
+
+      <button type="submit" class="btn btn-primary btn-lg btn-full" id="submitBtn">
+        <i class="fas fa-floppy-disk"></i> Enregistrer les modifications
+      </button>
+
+    </form>
+  </div>
+</div>
+
+<style>
+.profil-info-bar {
+  display: flex;
+  align-items: center;
+  gap: 20px;
+  padding: 16px;
+  background: #EBF2FA;
+  border-radius: 10px;
+  margin-bottom: 8px;
+}
+.profil-avatar {
+  width: 60px;
+  height: 60px;
+  border-radius: 50%;
+  background: #2E86C1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 26px;
+  color: white;
+  flex-shrink: 0;
+}
+.profil-details {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+.profil-name {
+  font-size: 18px;
+  font-weight: 700;
+  color: #1A2B4A;
+  margin: 0;
+}
+.profil-email {
+  font-size: 13px;
+  color: #718096;
+  margin: 0;
+}
+.profil-role {
+  display: inline-block;
+  font-size: 11px;
+  font-weight: 600;
+  padding: 3px 10px;
+  border-radius: 20px;
+  background: #2E86C1;
+  color: white;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+</style>
+{% endblock %}
+
+{% block scripts %}
+<script>
+// ── PROTECTION ACCÈS ──────────────────────────────────────
+(function () {
+  try {
+    const user = JSON.parse(localStorage.getItem("user"));
+    if (!user) {
+      sessionStorage.setItem("redirect_after_login", window.location.pathname);
+      window.location.replace("/connexion?message=connexion_requise");
+    }
+  } catch {
+    sessionStorage.setItem("redirect_after_login", window.location.pathname);
+    window.location.replace("/connexion?message=connexion_requise");
+  }
+})();
+// ─────────────────────────────────────────────────────────
+
+// ── CHARGER LES INFOS UTILISATEUR ────────────────────────
+document.addEventListener("DOMContentLoaded", () => {
+  let user = null;
+  try { user = JSON.parse(localStorage.getItem("user")); } catch {}
+  if (!user) return;
+
+  // Afficher les infos actuelles
+  document.getElementById("profilName").textContent  = user.prenoms + " " + user.nom;
+  document.getElementById("profilEmail").textContent = user.email;
+  document.getElementById("profilRole").textContent  = user.role || "visiteur";
+
+  // Pré-remplir le formulaire
+  document.getElementById("inputNom").value     = user.nom     || "";
+  document.getElementById("inputPrenoms").value = user.prenoms || "";
+  document.getElementById("inputEmail").value   = user.email   || "";
+});
+// ─────────────────────────────────────────────────────────
+
+// ── SOUMETTRE LES MODIFICATIONS ───────────────────────────
+async function submitProfil(e) {
+  e.preventDefault();
+
+  let user = null;
+  try { user = JSON.parse(localStorage.getItem("user")); } catch {}
+  if (!user) return;
+
+  const nouveauMdp  = document.getElementById("inputNouveauMdp").value;
+  const confirmMdp  = document.getElementById("inputConfirmMdp").value;
+  const ancienMdp   = document.getElementById("inputAncienMdp").value;
+
+  // Vérifier que les mots de passe correspondent
+  if (nouveauMdp && nouveauMdp !== confirmMdp) {
+    showAlert("error", "❌ Les mots de passe ne correspondent pas.");
+    return;
+  }
+
+  // Vérifier que l'ancien mdp est fourni si on veut changer
+  if (nouveauMdp && !ancienMdp) {
+    showAlert("error", "❌ Veuillez entrer votre ancien mot de passe.");
+    return;
+  }
+
+  const body = {
+    nom:     document.getElementById("inputNom").value.trim()     || null,
+    prenoms: document.getElementById("inputPrenoms").value.trim() || null,
+    email:   document.getElementById("inputEmail").value.trim()   || null,
+  };
+
+  if (nouveauMdp) {
+    body.mot_de_passe       = nouveauMdp;
+    body.ancien_mot_de_passe = ancienMdp;
+  }
+
+  const btn = document.getElementById("submitBtn");
+  btn.disabled = true;
+  btn.innerHTML = "⏳ Enregistrement…";
+
+  try {
+    const r = await fetch(`/api/auth/profil/${user.id}`, {
+      method: "PATCH",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(body)
+    });
+    const data = await r.json();
+
+    if (r.ok) {
+      // Mettre à jour le localStorage avec les nouvelles infos
+      const updatedUser = { ...user, ...data.user };
+      localStorage.setItem("user", JSON.stringify(updatedUser));
+
+      // Rafraîchir l'affichage
+      document.getElementById("profilName").textContent  = updatedUser.prenoms + " " + updatedUser.nom;
+      document.getElementById("profilEmail").textContent = updatedUser.email;
+
+      // Vider les champs mot de passe
+      document.getElementById("inputAncienMdp").value  = "";
+      document.getElementById("inputNouveauMdp").value = "";
+      document.getElementById("inputConfirmMdp").value = "";
+
+      showAlert("success", "✅ " + data.message);
+    } else {
+      showAlert("error", "❌ " + (data.detail || "Erreur."));
+    }
+  } catch {
+    showAlert("error", "❌ Impossible de contacter le serveur.");
+  } finally {
+    btn.disabled = false;
+    btn.innerHTML = '<i class="fas fa-floppy-disk"></i> Enregistrer les modifications';
+  }
+}
+// ─────────────────────────────────────────────────────────
+
+function showAlert(type, msg) {
+  const el = document.getElementById("formAlert");
+  el.className = "form-alert form-alert-" + type;
+  el.textContent = msg;
+  el.scrollIntoView({ behavior: "smooth", block: "center" });
+}
+</script>
+{% endblock %}

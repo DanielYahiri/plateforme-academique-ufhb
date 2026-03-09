@@ -148,3 +148,80 @@ async def changer_role(user_id: int, data: ChangerRole):
         )
     r.raise_for_status()
     return {"ok": True, "message": f"Rôle mis à jour : {data.role}"}
+
+class ModifierProfil(BaseModel):
+    nom:           Optional[str] = None
+    prenoms:       Optional[str] = None
+    email:         Optional[EmailStr] = None
+    mot_de_passe:  Optional[str] = None
+    ancien_mot_de_passe: Optional[str] = None
+
+@router.patch("/auth/profil/{user_id}")
+async def modifier_profil(user_id: int, data: ModifierProfil):
+    from config import SUPABASE_URL, SUPABASE_HEADERS
+    import httpx
+
+    # Récupérer l'utilisateur actuel
+    h = SUPABASE_HEADERS.copy()
+    h["Accept-Profile"] = "auth_app"
+    url = f"{SUPABASE_URL}/rest/v1/utilisateurs"
+
+    async with httpx.AsyncClient(timeout=15) as client:
+        r = await client.get(url, headers=h, params={
+            "select": "*", "id": f"eq.{user_id}"
+        })
+    r.raise_for_status()
+    users = r.json()
+    if not users:
+        raise HTTPException(status_code=404, detail="Utilisateur introuvable.")
+    user = users[0]
+
+    payload = {}
+
+    # Modification nom / prenoms
+    if data.nom:
+        payload["nom"] = data.nom.upper()
+    if data.prenoms:
+        payload["prenoms"] = data.prenoms
+
+    # Modification email — vérifier qu'il n'est pas déjà pris
+    if data.email and data.email != user["email"]:
+        existant = await get_user_by_email(data.email)
+        if existant:
+            raise HTTPException(status_code=400, detail="Cet email est déjà utilisé.")
+        payload["email"] = data.email
+
+    # Modification mot de passe — vérifier l'ancien
+    if data.mot_de_passe:
+        if not data.ancien_mot_de_passe:
+            raise HTTPException(status_code=400, detail="Ancien mot de passe requis.")
+        if not verifier_mdp(data.ancien_mot_de_passe, user["mot_de_passe"]):
+            raise HTTPException(status_code=401, detail="Ancien mot de passe incorrect.")
+        payload["mot_de_passe"] = hasher_mdp(data.mot_de_passe)
+
+    if not payload:
+        raise HTTPException(status_code=400, detail="Aucune modification détectée.")
+
+    # Appliquer les modifications
+    h2 = SUPABASE_HEADERS.copy()
+    h2["Content-Profile"] = "auth_app"
+    async with httpx.AsyncClient(timeout=15) as client:
+        r = await client.patch(url, headers=h2,
+            params={"id": f"eq.{user_id}"},
+            json=payload
+        )
+    r.raise_for_status()
+
+    # Retourner les nouvelles infos
+    return {
+        "ok": True,
+        "message": "Profil mis à jour avec succès.",
+        "user": {
+            "id": user_id,
+            "nom": payload.get("nom", user["nom"]),
+            "prenoms": payload.get("prenoms", user["prenoms"]),
+            "email": payload.get("email", user["email"]),
+            "role": user["role"],
+            "statut": user["statut"],
+        }
+    }

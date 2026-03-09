@@ -25,8 +25,8 @@
       </div>
 
       <button type="submit" class="btn btn-primary btn-lg btn-full" id="submitBtn">
-  <i class="fas fa-right-to-bracket"></i> Se connecter
-</button>
+        <i class="fas fa-right-to-bracket"></i> Se connecter
+      </button>
 
       <p style="text-align:center;margin-top:18px;font-size:13px;color:#7F8C8D;">
         Pas encore de compte ? <a href="/inscription" style="color:#2E86C1;font-weight:600;">S'inscrire</a>
@@ -39,6 +39,28 @@
 
 {% block scripts %}
 <script>
+// ── MESSAGE SI REDIRECTION DEPUIS PAGE PROTÉGÉE ───────────
+document.addEventListener("DOMContentLoaded", () => {
+  const params = new URLSearchParams(window.location.search);
+  if (params.get("message") === "connexion_requise") {
+    const banner = document.createElement("div");
+    banner.style.cssText = `
+      background: #FFF3CD;
+      color: #856404;
+      border: 1px solid #FFEEBA;
+      padding: 12px 16px;
+      border-radius: 6px;
+      margin-bottom: 16px;
+      font-size: 14px;
+      text-align: center;
+    `;
+    banner.innerHTML = "🔒 Connectez-vous pour accéder à cette section.";
+    const form = document.querySelector("form");
+    if (form) form.insertAdjacentElement("beforebegin", banner);
+  }
+});
+// ─────────────────────────────────────────────────────────
+
 async function submitConnexion(e) {
   e.preventDefault();
   const btn = document.getElementById('submitBtn');
@@ -62,7 +84,15 @@ async function submitConnexion(e) {
       // Sauvegarde les infos utilisateur
       localStorage.setItem('user', JSON.stringify(data.user));
       showAlert('success', '✅ ' + data.message);
-      setTimeout(() => location.href = '/', 1500);
+
+      // ── REDIRECTION VERS LA PAGE DEMANDÉE ─────────────
+      setTimeout(() => {
+        const redirectTo = sessionStorage.getItem("redirect_after_login") || "/";
+        sessionStorage.removeItem("redirect_after_login");
+        location.href = redirectTo;
+      }, 1500);
+      // ──────────────────────────────────────────────────
+
     } else {
       showAlert('error', '❌ ' + (data.detail || 'Erreur.'));
     }
@@ -70,7 +100,7 @@ async function submitConnexion(e) {
     showAlert('error', '❌ Impossible de contacter le serveur.');
   } finally {
     btn.disabled = false;
-    btn.textContent = "🔐 Se connecter";
+    btn.innerHTML = '<i class="fas fa-right-to-bracket"></i> Se connecter';
   }
 }
 

@@ -72,10 +72,6 @@ async def envoyer_sujet(data: SoumissionSujet):
         await send_email(EMAIL_DESTINATAIRE,
                          f"[Soumission] {types.get(data.type_document)} — {data.matiere} ({data.niveau})",
                          wrap("Nouvelle soumission", content))
-        await send_email(data.expediteur_email, f"[{APP_NAME}] Confirmation de soumission",
-                         wrap("Accusé de réception",
-                              f"<p>Bonjour <strong>{data.expediteur_nom}</strong>,</p><p>Votre soumission a bien été reçue. Merci !</p>"))
-
         return {"ok": True, "message": "Soumission envoyée avec succès !"}
     except Exception as e:
         print(f"ERREUR D'ENVOI (SUJET): {e}")  # Pour voir l'erreur dans les logs Render
@@ -94,9 +90,6 @@ async def envoyer_feedback(data: FeedbackForm):
 
         # Envoi des emails avec await (Bien indentés dans le bloc try)
         await send_email(EMAIL_DESTINATAIRE, f"[Feedback] {data.sujet} — {data.nom}", wrap("Nouveau feedback", content))
-        await send_email(data.email, f"[{APP_NAME}] Merci pour votre feedback",
-                         wrap("Feedback reçu",
-                              f"<p>Bonjour <strong>{data.nom}</strong>,</p><p>Merci pour votre retour !</p>"))
 
         return {"ok": True, "message": "Feedback envoyé avec succès !"}
     except Exception as e:

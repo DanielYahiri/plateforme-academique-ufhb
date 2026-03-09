@@ -1,13 +1,9 @@
 from fastapi import APIRouter, HTTPException
 from pydantic import BaseModel, EmailStr
 from typing import Optional
-import smtplib
-from email.mime.multipart import MIMEMultipart
-from email.mime.text import MIMEText
+import resend
 from datetime import datetime
-from config import GMAIL_USER, GMAIL_PASSWORD, EMAIL_DESTINATAIRE, APP_NAME
-import asyncio
-from concurrent.futures import ThreadPoolExecutor
+from config import RESEND_API_KEY, EMAIL_DESTINATAIRE, APP_NAME
 
 router = APIRouter(tags=["email"])
 
@@ -31,25 +27,17 @@ class FeedbackForm(BaseModel):
     note: Optional[int] = None
 
 
-executor = ThreadPoolExecutor(max_workers=2)
 
 
-def _send_email_sync(to: str, subject: str, html_body: str):
-    msg = MIMEMultipart("alternative")
-    msg["Subject"] = subject
-    msg["From"] = GMAIL_USER
-    msg["To"] = to
-    msg.attach(MIMEText(html_body, "html", "utf-8"))
-    # Utilisation du port 465 avec SSL pour Gmail
-    with smtplib.SMTP_SSL("://gmail.com", 465, timeout=15) as server:
-        server.login(GMAIL_USER, GMAIL_PASSWORD)
-        server.sendmail(GMAIL_USER, to, msg.as_string())
-
+resend.api_key = RESEND_API_KEY
 
 async def send_email(to: str, subject: str, html_body: str):
-    loop = asyncio.get_event_loop()
-    await loop.run_in_executor(executor, _send_email_sync, to, subject, html_body)
-
+    resend.Emails.send({
+        "from": "Classe Étoile <onboarding@resend.dev>",
+        "to": to,
+        "subject": subject,
+        "html": html_body,
+    })
 
 def wrap(title: str, content: str) -> str:
     return f"""<!DOCTYPE html><html><head><meta charset="utf-8"></head>

@@ -33,3 +33,10 @@ app.include_router(upload_router.router, prefix="/api")
 
 if __name__ == "__main__":
     uvicorn.run("main:app", host="0.0.0.0", port=8000, reload=True)
+
+from fastapi.responses import FileResponse
+
+@app.get('/favicon.ico', include_in_schema=False)
+async def favicon():
+    # Assurez-vous que le chemin correspond à l'endroit où vous avez mis l'image
+    return FileResponse("static/img/logo_ufhb.png")

@@ -3,103 +3,126 @@
 {% block nav_nouveautes %}active{% endblock %}
 
 {% block content %}
-<div class="container mt-4">
+<div class="page-container">
 
-  <div class="d-flex justify-content-between align-items-center mb-4">
-    <h4 class="mb-0"><i class="fas fa-bell"></i> Nouveautés</h4>
-    <span class="badge bg-secondary">{{ now.strftime('%A %d %B %Y') }}</span>
+  <!-- HEADER -->
+  <div class="page-header">
+    <div>
+      <div class="page-title"><i class="fas fa-bell"></i> Nouveautés</div>
+      <div class="page-sub">{{ now.strftime('%A %d %B %Y') }}</div>
+    </div>
   </div>
 
   <!-- ANNONCES -->
-  <div class="card mb-4">
-    <div class="card-header d-flex justify-content-between align-items-center">
-      <span><i class="fas fa-bullhorn me-2"></i>Annonces</span>
-      <span class="badge bg-primary">3 nouveautés</span>
+  <div class="table-wrap" style="margin-bottom:24px; padding:24px;">
+
+    <div style="display:flex; align-items:center; justify-content:space-between; margin-bottom:20px;">
+      <span style="font-size:15px; font-weight:700; color:var(--primary);">
+        <i class="fas fa-bullhorn"></i> Annonces
+      </span>
+      <span class="count-badge">3 nouveautés</span>
     </div>
-    <div class="card-body">
 
-      <div class="d-flex gap-3 align-items-start mb-3">
-        <div class="rounded-circle bg-primary bg-opacity-10 p-2 d-flex align-items-center justify-content-center" style="width:42px;height:42px;flex-shrink:0;">
-          <i class="fas fa-file-pen text-primary"></i>
+    <!-- Devoir -->
+    <div style="display:flex; gap:14px; align-items:flex-start; margin-bottom:18px;">
+      <div style="width:42px;height:42px;border-radius:50%;background:#EBF5FB;display:flex;align-items:center;justify-content:center;flex-shrink:0;">
+        <i class="fas fa-file-pen" style="color:var(--secondary);font-size:16px;"></i>
+      </div>
+      <div>
+        <div style="font-size:13px;font-weight:700;color:var(--text);margin-bottom:4px;">
+          Nouveaux sujets de devoir disponibles
         </div>
-        <div>
-          <strong>Nouveaux sujets de devoir disponibles</strong><br>
-          <small class="text-muted">Des sujets ont été ajoutés pour les années <strong>2024</strong> et <strong>2025</strong>
+        <div style="font-size:13px;color:var(--muted);line-height:1.6;">
+          Des sujets ont été ajoutés pour les années <strong>2024</strong> et <strong>2025</strong>
           — niveaux <strong>L1</strong> et <strong>L2</strong>.
-          Consultez l'onglet <a href="/devoirs">Devoirs</a> pour les télécharger.</small>
+          Consultez l'onglet <a href="/devoirs" style="color:var(--secondary);font-weight:600;">Devoirs</a> pour les télécharger.
         </div>
       </div>
-
-      <hr>
-
-      <div class="d-flex gap-3 align-items-start mb-3">
-        <div class="rounded-circle bg-warning bg-opacity-10 p-2 d-flex align-items-center justify-content-center" style="width:42px;height:42px;flex-shrink:0;">
-          <i class="fas fa-scroll text-warning"></i>
-        </div>
-        <div>
-          <strong>Nouveaux sujets d'examen disponibles</strong><br>
-          <small class="text-muted">Des sujets ont été mis en ligne pour les années <strong>2024</strong> et <strong>2025</strong>
-          — niveaux <strong>L1</strong> et <strong>L2</strong>.
-          Consultez l'onglet <a href="/examens">Examens</a>.</small>
-        </div>
-      </div>
-
-      <hr>
-
-      <div class="d-flex gap-3 align-items-start">
-        <div class="rounded-circle bg-success bg-opacity-10 p-2 d-flex align-items-center justify-content-center" style="width:42px;height:42px;flex-shrink:0;">
-          <i class="fas fa-chalkboard-teacher text-success"></i>
-        </div>
-        <div>
-          <strong>Nouveaux travaux dirigés disponibles</strong><br>
-          <small class="text-muted">De nouveaux TD ont été ajoutés pour les années <strong>2024</strong> et <strong>2025</strong>
-          — niveaux <strong>L1</strong> et <strong>L2</strong>.
-          Consultez l'onglet <a href="/td">TD</a>.</small>
-        </div>
-      </div>
-
     </div>
+
+    <hr style="border:none;border-top:1px solid var(--border);margin:0 0 18px;">
+
+    <!-- Examen -->
+    <div style="display:flex; gap:14px; align-items:flex-start; margin-bottom:18px;">
+      <div style="width:42px;height:42px;border-radius:50%;background:#FEF9E7;display:flex;align-items:center;justify-content:center;flex-shrink:0;">
+        <i class="fas fa-scroll" style="color:var(--accent);font-size:16px;"></i>
+      </div>
+      <div>
+        <div style="font-size:13px;font-weight:700;color:var(--text);margin-bottom:4px;">
+          Nouveaux sujets d'examen disponibles
+        </div>
+        <div style="font-size:13px;color:var(--muted);line-height:1.6;">
+          Des sujets ont été mis en ligne pour les années <strong>2024</strong> et <strong>2025</strong>
+          — niveaux <strong>L1</strong> et <strong>L2</strong>.
+          Consultez l'onglet <a href="/examens" style="color:var(--secondary);font-weight:600;">Examens</a>.
+        </div>
+      </div>
+    </div>
+
+    <hr style="border:none;border-top:1px solid var(--border);margin:0 0 18px;">
+
+    <!-- TD -->
+    <div style="display:flex; gap:14px; align-items:flex-start;">
+      <div style="width:42px;height:42px;border-radius:50%;background:#EAFAF1;display:flex;align-items:center;justify-content:center;flex-shrink:0;">
+        <i class="fas fa-chalkboard-teacher" style="color:var(--success);font-size:16px;"></i>
+      </div>
+      <div>
+        <div style="font-size:13px;font-weight:700;color:var(--text);margin-bottom:4px;">
+          Nouveaux travaux dirigés disponibles
+        </div>
+        <div style="font-size:13px;color:var(--muted);line-height:1.6;">
+          De nouveaux TD ont été ajoutés pour les années <strong>2024</strong> et <strong>2025</strong>
+          — niveaux <strong>L1</strong> et <strong>L2</strong>.
+          Consultez l'onglet <a href="/td" style="color:var(--secondary);font-weight:600;">TD</a>.
+        </div>
+      </div>
+    </div>
+
   </div>
 
   <!-- MATIERES ACTIVES -->
-  <div class="card mb-4">
-    <div class="card-header d-flex justify-content-between align-items-center">
-      <span><i class="fas fa-graduation-cap me-2"></i>Matières actives</span>
-      <span class="badge bg-success">Maquette à jour</span>
-    </div>
-    <div class="card-body p-0">
-      {% if matieres_actives %}
-      <table class="table table-hover mb-0">
-        <thead class="table-light">
-          <tr>
-            <th>Niveau</th>
-            <th>Matière</th>
-            <th>Type</th>
-            <th>Semestre</th>
-            <th>Crédits</th>
-          </tr>
-        </thead>
-        <tbody>
-          {% for m in matieres_actives %}
-          <tr>
-            <td>{{ m.niveau_scolaire }}</td>
-            <td>{{ m.nom_mat }}</td>
-            <td>{{ m.type_mat }}</td>
-            <td>{{ m.sem_mat }}</td>
-            <td>{{ m.credit }}</td>
-          </tr>
-          {% endfor %}
-        </tbody>
-      </table>
-      {% else %}
-      <p class="text-muted p-3 mb-0">Aucune matière active.</p>
-      {% endif %}
-    </div>
-    <div class="card-footer text-end">
-      <a href="/matieres" class="btn btn-sm btn-outline-primary">
-        <i class="fas fa-list me-1"></i> Voir toutes les matières →
-      </a>
-    </div>
+  <div style="display:flex; align-items:center; justify-content:space-between; margin-bottom:12px;">
+    <span style="font-size:15px; font-weight:700; color:var(--primary);">
+      <i class="fas fa-graduation-cap"></i> Matières actives
+    </span>
+    <span class="count-badge" style="background:#EAFAF1;color:var(--success);border-color:#A9DFBF;">
+      Maquette à jour
+    </span>
+  </div>
+
+  <div class="table-wrap">
+    {% if matieres_actives %}
+    <table class="data-table">
+      <thead>
+        <tr>
+          <th>Niveau</th>
+          <th>Matière</th>
+          <th>Type</th>
+          <th>Semestre</th>
+          <th>Crédits</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for m in matieres_actives %}
+        <tr>
+          <td>{{ m.niveau_scolaire }}</td>
+          <td>{{ m.nom_mat }}</td>
+          <td>{{ m.type_mat }}</td>
+          <td>{{ m.sem_mat }}</td>
+          <td>{{ m.credit }}</td>
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+    {% else %}
+    <div class="table-empty">Aucune matière active.</div>
+    {% endif %}
+  </div>
+
+  <div style="text-align:right; margin-top:12px;">
+    <a href="/matieres" class="btn btn-primary">
+      <i class="fas fa-list"></i> Voir toutes les matières
+    </a>
   </div>
 
 </div>

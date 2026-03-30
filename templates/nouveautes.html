@@ -4,37 +4,103 @@
 
 {% block content %}
 <div class="container mt-4">
-  <h2 class="mb-4"><i class="fas fa-bell"></i> Nouveautés</h2>
+
+  <div class="d-flex justify-content-between align-items-center mb-4">
+    <h4 class="mb-0"><i class="fas fa-bell"></i> Nouveautés</h4>
+    <span class="badge bg-secondary">{{ now.strftime('%A %d %B %Y') }}</span>
+  </div>
+
+  <!-- ANNONCES -->
+  <div class="card mb-4">
+    <div class="card-header d-flex justify-content-between align-items-center">
+      <span><i class="fas fa-bullhorn me-2"></i>Annonces</span>
+      <span class="badge bg-primary">3 nouveautés</span>
+    </div>
+    <div class="card-body">
+
+      <div class="d-flex gap-3 align-items-start mb-3">
+        <div class="rounded-circle bg-primary bg-opacity-10 p-2 d-flex align-items-center justify-content-center" style="width:42px;height:42px;flex-shrink:0;">
+          <i class="fas fa-file-pen text-primary"></i>
+        </div>
+        <div>
+          <strong>Nouveaux sujets de devoir disponibles</strong><br>
+          <small class="text-muted">Des sujets ont été ajoutés pour les années <strong>2024</strong> et <strong>2025</strong>
+          — niveaux <strong>L1</strong> et <strong>L2</strong>.
+          Consultez l'onglet <a href="/devoirs">Devoirs</a> pour les télécharger.</small>
+        </div>
+      </div>
+
+      <hr>
+
+      <div class="d-flex gap-3 align-items-start mb-3">
+        <div class="rounded-circle bg-warning bg-opacity-10 p-2 d-flex align-items-center justify-content-center" style="width:42px;height:42px;flex-shrink:0;">
+          <i class="fas fa-scroll text-warning"></i>
+        </div>
+        <div>
+          <strong>Nouveaux sujets d'examen disponibles</strong><br>
+          <small class="text-muted">Des sujets ont été mis en ligne pour les années <strong>2024</strong> et <strong>2025</strong>
+          — niveaux <strong>L1</strong> et <strong>L2</strong>.
+          Consultez l'onglet <a href="/examens">Examens</a>.</small>
+        </div>
+      </div>
+
+      <hr>
+
+      <div class="d-flex gap-3 align-items-start">
+        <div class="rounded-circle bg-success bg-opacity-10 p-2 d-flex align-items-center justify-content-center" style="width:42px;height:42px;flex-shrink:0;">
+          <i class="fas fa-chalkboard-teacher text-success"></i>
+        </div>
+        <div>
+          <strong>Nouveaux travaux dirigés disponibles</strong><br>
+          <small class="text-muted">De nouveaux TD ont été ajoutés pour les années <strong>2024</strong> et <strong>2025</strong>
+          — niveaux <strong>L1</strong> et <strong>L2</strong>.
+          Consultez l'onglet <a href="/td">TD</a>.</small>
+        </div>
+      </div>
+
+    </div>
+  </div>
 
   <!-- MATIERES ACTIVES -->
-  <section class="mb-5">
-    <h4>🎓 Nouvelles Matières actives</h4>
-    {% if nouvelles_matieres %}
-    <table class="table table-bordered table-hover">
-      <thead class="table-dark">
-        <tr>
-          <th>Niveau</th>
-          <th>Matière</th>
-          <th>Type</th>
-          <th>Semestre</th>
-          <th>Crédits</th>
-        </tr>
-      </thead>
-      <tbody>
-        {% for m in nouvelles_matieres %}
-        <tr>
-          <td>{{ m.niveau_scolaire }}</td>
-          <td>{{ m.nom_mat }}</td>
-          <td>{{ m.type_mat }}</td>
-          <td>{{ m.sem_mat }}</td>
-          <td>{{ m.credit }}</td>
-        </tr>
-        {% endfor %}
-      </tbody>
-    </table>
-    {% else %}
-    <p class="text-muted">Aucune matière active pour le moment.</p>
-    {% endif %}
-  </section>
+  <div class="card mb-4">
+    <div class="card-header d-flex justify-content-between align-items-center">
+      <span><i class="fas fa-graduation-cap me-2"></i>Matières actives</span>
+      <span class="badge bg-success">Maquette à jour</span>
+    </div>
+    <div class="card-body p-0">
+      {% if matieres_actives %}
+      <table class="table table-hover mb-0">
+        <thead class="table-light">
+          <tr>
+            <th>Niveau</th>
+            <th>Matière</th>
+            <th>Type</th>
+            <th>Semestre</th>
+            <th>Crédits</th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for m in matieres_actives %}
+          <tr>
+            <td>{{ m.niveau_scolaire }}</td>
+            <td>{{ m.nom_mat }}</td>
+            <td>{{ m.type_mat }}</td>
+            <td>{{ m.sem_mat }}</td>
+            <td>{{ m.credit }}</td>
+          </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+      {% else %}
+      <p class="text-muted p-3 mb-0">Aucune matière active.</p>
+      {% endif %}
+    </div>
+    <div class="card-footer text-end">
+      <a href="/matieres" class="btn btn-sm btn-outline-primary">
+        <i class="fas fa-list me-1"></i> Voir toutes les matières →
+      </a>
+    </div>
+  </div>
+
 </div>
 {% endblock %}

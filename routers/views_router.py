@@ -70,17 +70,20 @@ async def dashboard_admin(request: Request):
     return templates.TemplateResponse("dashboard_admin.html", {"request": request})
 
 # ✅ ROUTE NOUVEAUTÉS
+from datetime import datetime
+
 @router.get("/nouveautes")
 async def nouveautes(request: Request):
     try:
-        nouvelles_matieres = await db.fetch_view(
-            "Liste_matiere_niveau", "referentiel"
+        matieres_actives = await db.fetch_recent(
+            "Liste_matiere_niveau", "referentiel", "nom_mat", 5
         )
     except Exception as e:
         print(f"ERREUR MATIERES: {e}")
-        nouvelles_matieres = []
+        matieres_actives = []
 
     return templates.TemplateResponse("nouveautes.html", {
-        "request":            request,
-        "nouvelles_matieres": nouvelles_matieres,
+        "request":          request,
+        "matieres_actives": matieres_actives,
+        "now":              datetime.now(),
     })

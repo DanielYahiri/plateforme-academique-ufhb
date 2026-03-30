@@ -73,31 +73,14 @@ async def dashboard_admin(request: Request):
 @router.get("/nouveautes")
 async def nouveautes(request: Request):
     try:
-        derniers_devoirs  = await db.fetch_recent("devoir",        "controles", "code_annee", 5)
-    except Exception:
-        derniers_devoirs  = []
-    try:
-        derniers_examens  = await db.fetch_recent("examen",        "controles", "code_annee", 5)
-    except Exception:
-        derniers_examens  = []
-    try:
-        derniers_tds      = await db.fetch_recent("td",            "pedagogie", "code_annee", 5)
-    except Exception:
-        derniers_tds      = []
-    try:
-        derniers_supports = await db.fetch_recent("support_cours", "pedagogie", "code_support", 5)
-    except Exception:
-        derniers_supports = []
-    try:
-        nouvelle_maquette = await db.fetch_filtered("Matiere (UE)", "referentiel", {"actif": "true"})
-    except Exception:
-        nouvelle_maquette = []
+        nouvelles_matieres = await db.fetch_view(
+            "Liste_matiere_niveau", "referentiel"
+        )
+    except Exception as e:
+        print(f"ERREUR MATIERES: {e}")
+        nouvelles_matieres = []
 
     return templates.TemplateResponse("nouveautes.html", {
-        "request":           request,
-        "derniers_devoirs":  derniers_devoirs,
-        "derniers_examens":  derniers_examens,
-        "derniers_tds":      derniers_tds,
-        "derniers_supports": derniers_supports,
-        "nouvelle_maquette": nouvelle_maquette,
+        "request":            request,
+        "nouvelles_matieres": nouvelles_matieres,
     })

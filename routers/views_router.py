@@ -1,6 +1,8 @@
 from fastapi import APIRouter, Request
 from fastapi.templating import Jinja2Templates
 from fastapi.responses import RedirectResponse
+import supabase_client as db
+
 router = APIRouter()
 templates = Jinja2Templates(directory="templates")
 
@@ -66,3 +68,36 @@ async def dashboard_admin(request: Request):
     if user != "admin":
         return RedirectResponse(url="/connexion", status_code=302)
     return templates.TemplateResponse("dashboard_admin.html", {"request": request})
+
+# ✅ ROUTE NOUVEAUTÉS
+@router.get("/nouveautes")
+async def nouveautes(request: Request):
+    try:
+        derniers_devoirs  = await db.fetch_recent("devoir",        "controles", "code_annee", 5)
+    except Exception:
+        derniers_devoirs  = []
+    try:
+        derniers_examens  = await db.fetch_recent("examen",        "controles", "code_annee", 5)
+    except Exception:
+        derniers_examens  = []
+    try:
+        derniers_tds      = await db.fetch_recent("td",            "pedagogie", "code_annee", 5)
+    except Exception:
+        derniers_tds      = []
+    try:
+        derniers_supports = await db.fetch_recent("support_cours", "pedagogie", "code_support", 5)
+    except Exception:
+        derniers_supports = []
+    try:
+        nouvelle_maquette = await db.fetch_filtered("Matiere (UE)", "referentiel", {"actif": "true"})
+    except Exception:
+        nouvelle_maquette = []
+
+    return templates.TemplateResponse("nouveautes.html", {
+        "request":           request,
+        "derniers_devoirs":  derniers_devoirs,
+        "derniers_examens":  derniers_examens,
+        "derniers_tds":      derniers_tds,
+        "derniers_supports": derniers_supports,
+        "nouvelle_maquette": nouvelle_maquette,
+    })

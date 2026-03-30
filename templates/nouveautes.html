@@ -1,0 +1,316 @@
+{% extends "base.html" %}
+{% block title %}Nouveautés — Plateforme Académique{% endblock %}
+{% block nav_nouveautes %}active{% endblock %}
+
+{% block content %}
+<style>
+  .nouveautes-hero {
+    background: linear-gradient(135deg, #1a3a6b 0%, #2563eb 100%);
+    color: #fff;
+    text-align: center;
+    padding: 3.5rem 2rem 2.5rem;
+  }
+  .nouveautes-hero h1 {
+    font-size: 2rem;
+    font-weight: 800;
+    margin-bottom: 0.5rem;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.6rem;
+  }
+  .nouveautes-hero p {
+    font-size: 0.97rem;
+    opacity: 0.85;
+    max-width: 520px;
+    margin: 0 auto;
+  }
+  .nv-container {
+    max-width: 860px;
+    margin: 0 auto;
+    padding: 2.5rem 1.5rem 4rem;
+  }
+  .nv-section-title {
+    font-size: 1.05rem;
+    font-weight: 700;
+    color: #1e293b;
+    margin: 2rem 0 1rem;
+    display: flex;
+    align-items: center;
+    gap: 0.6rem;
+    padding-bottom: 0.5rem;
+    border-bottom: 2px solid #e2e8f0;
+  }
+  .nv-section-title i { color: #2563eb; }
+  .nv-empty {
+    text-align: center;
+    color: #94a3b8;
+    font-size: 0.88rem;
+    padding: 1.5rem;
+    background: #f8fafc;
+    border-radius: 10px;
+    margin-bottom: 1rem;
+  }
+  .nv-card {
+    background: #fff;
+    border-radius: 14px;
+    padding: 1.2rem 1.5rem;
+    box-shadow: 0 2px 16px rgba(0,0,0,0.07);
+    border-left: 5px solid #2563eb;
+    display: flex;
+    gap: 1.1rem;
+    align-items: flex-start;
+    margin-bottom: 0.9rem;
+    transition: transform 0.2s, box-shadow 0.2s;
+    animation: nvFade 0.35s ease both;
+  }
+  .nv-card:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 8px 28px rgba(0,0,0,0.11);
+  }
+  .nv-card.devoir   { border-left-color: #16a34a; }
+  .nv-card.examen   { border-left-color: #dc2626; }
+  .nv-card.td       { border-left-color: #f59e0b; }
+  .nv-card.support  { border-left-color: #7c3aed; }
+
+  .nv-icon {
+    width: 44px;
+    height: 44px;
+    border-radius: 12px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1.1rem;
+    flex-shrink: 0;
+  }
+  .nv-card.devoir  .nv-icon { background: #dcfce7; color: #16a34a; }
+  .nv-card.examen  .nv-icon { background: #fee2e2; color: #dc2626; }
+  .nv-card.td      .nv-icon { background: #fef9c3; color: #b45309; }
+  .nv-card.support .nv-icon { background: #ede9fe; color: #7c3aed; }
+
+  .nv-body { flex: 1; min-width: 0; }
+  .nv-header {
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    flex-wrap: wrap;
+    gap: 0.4rem;
+    margin-bottom: 0.3rem;
+  }
+  .nv-titre {
+    font-size: 0.95rem;
+    font-weight: 700;
+    color: #1e293b;
+  }
+  .nv-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.3rem;
+    padding: 0.13rem 0.65rem;
+    border-radius: 999px;
+    font-size: 0.7rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+  }
+  .nv-card.devoir  .nv-badge { background: #dcfce7; color: #16a34a; }
+  .nv-card.examen  .nv-badge { background: #fee2e2; color: #dc2626; }
+  .nv-card.td      .nv-badge { background: #fef9c3; color: #b45309; }
+  .nv-card.support .nv-badge { background: #ede9fe; color: #7c3aed; }
+
+  .nv-meta {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.5rem;
+    margin-top: 0.5rem;
+  }
+  .nv-tag {
+    background: #f1f5f9;
+    border: 1px solid #e2e8f0;
+    border-radius: 6px;
+    padding: 0.18rem 0.6rem;
+    font-size: 0.76rem;
+    color: #475569;
+    display: inline-flex;
+    align-items: center;
+    gap: 0.3rem;
+  }
+  .nv-desc {
+    font-size: 0.85rem;
+    color: #64748b;
+    margin-top: 0.4rem;
+    line-height: 1.5;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    max-width: 560px;
+  }
+  @keyframes nvFade {
+    from { opacity: 0; transform: translateY(8px); }
+    to   { opacity: 1; transform: translateY(0); }
+  }
+  @media (max-width: 580px) {
+    .nv-card { flex-direction: column; gap: 0.7rem; }
+    .nv-icon { width: 36px; height: 36px; font-size: 0.9rem; }
+  }
+</style>
+
+<!-- HERO -->
+<div class="nouveautes-hero">
+  <h1><i class="fas fa-bell"></i> Nouveautés</h1>
+  <p>Retrouvez ici les derniers devoirs, examens, TD et supports de cours ajoutés sur la plateforme.</p>
+</div>
+
+<div class="nv-container">
+
+  <!-- ══ DEVOIRS ══ -->
+  <div class="nv-section-title">
+    <i class="fas fa-book"></i> Derniers Devoirs ajoutés
+  </div>
+  {% if derniers_devoirs %}
+    {% for d in derniers_devoirs %}
+    <div class="nv-card devoir">
+      <div class="nv-icon"><i class="fas fa-book"></i></div>
+      <div class="nv-body">
+        <div class="nv-header">
+          <span class="nv-titre">Devoir N°{{ d.num_dev }} — {{ d.code_mat }}</span>
+          <span class="nv-badge"><i class="fas fa-file-circle-plus"></i> Ajout</span>
+        </div>
+        <div class="nv-meta">
+          <span class="nv-tag"><i class="fas fa-layer-group"></i> {{ d.code_niveau }}</span>
+          <span class="nv-tag"><i class="fas fa-calendar"></i> Année {{ d.code_annee }}</span>
+          <span class="nv-tag"><i class="fas fa-clock"></i> Semestre {{ d.sem_mat }}</span>
+        </div>
+        {% if d.sujet_dev and d.sujet_dev != 'pas encore disponible' %}
+        <p class="nv-desc"><i class="fas fa-link"></i> Sujet disponible</p>
+        {% else %}
+        <p class="nv-desc"><i class="fas fa-hourglass-half"></i> Sujet pas encore disponible</p>
+        {% endif %}
+      </div>
+    </div>
+    {% endfor %}
+  {% else %}
+    <div class="nv-empty"><i class="fas fa-inbox"></i> Aucun devoir récent.</div>
+  {% endif %}
+
+  <!-- ══ EXAMENS ══ -->
+  <div class="nv-section-title">
+    <i class="fas fa-file-alt"></i> Derniers Examens ajoutés
+  </div>
+  {% if derniers_examens %}
+    {% for e in derniers_examens %}
+    <div class="nv-card examen">
+      <div class="nv-icon"><i class="fas fa-file-alt"></i></div>
+      <div class="nv-body">
+        <div class="nv-header">
+          <span class="nv-titre">Examen — {{ e.code_mat }} (Session {{ e.session }})</span>
+          <span class="nv-badge"><i class="fas fa-file-circle-plus"></i> Ajout</span>
+        </div>
+        <div class="nv-meta">
+          <span class="nv-tag"><i class="fas fa-layer-group"></i> {{ e.code_niveau }}</span>
+          <span class="nv-tag"><i class="fas fa-calendar"></i> Année {{ e.code_annee }}</span>
+          <span class="nv-tag"><i class="fas fa-rotate"></i> Session {{ e.session }}</span>
+        </div>
+        {% if e.sujet_exam and e.sujet_exam != 'pas encore disponible' %}
+        <p class="nv-desc"><i class="fas fa-link"></i> Sujet disponible</p>
+        {% else %}
+        <p class="nv-desc"><i class="fas fa-hourglass-half"></i> Sujet pas encore disponible</p>
+        {% endif %}
+      </div>
+    </div>
+    {% endfor %}
+  {% else %}
+    <div class="nv-empty"><i class="fas fa-inbox"></i> Aucun examen récent.</div>
+  {% endif %}
+
+  <!-- ══ TD ══ -->
+  <div class="nv-section-title">
+    <i class="fas fa-chalkboard-teacher"></i> Derniers Travaux Dirigés ajoutés
+  </div>
+  {% if derniers_tds %}
+    {% for t in derniers_tds %}
+    <div class="nv-card td">
+      <div class="nv-icon"><i class="fas fa-chalkboard-teacher"></i></div>
+      <div class="nv-body">
+        <div class="nv-header">
+          <span class="nv-titre">TD — {{ t.code_mat }} ({{ t.code_niveau }})</span>
+          <span class="nv-badge"><i class="fas fa-file-circle-plus"></i> Ajout</span>
+        </div>
+        <div class="nv-meta">
+          <span class="nv-tag"><i class="fas fa-layer-group"></i> {{ t.code_niveau }}</span>
+          <span class="nv-tag"><i class="fas fa-calendar"></i> Année {{ t.code_annee }}</span>
+          <span class="nv-tag"><i class="fas fa-clock"></i> Semestre {{ t.sem_td }}</span>
+        </div>
+        {% if t.sujet_td and t.sujet_td != 'pas encore disponible' %}
+        <p class="nv-desc"><i class="fas fa-link"></i> Sujet disponible</p>
+        {% else %}
+        <p class="nv-desc"><i class="fas fa-hourglass-half"></i> Sujet pas encore disponible</p>
+        {% endif %}
+      </div>
+    </div>
+    {% endfor %}
+  {% else %}
+    <div class="nv-empty"><i class="fas fa-inbox"></i> Aucun TD récent.</div>
+  {% endif %}
+
+  <!-- ══ SUPPORTS ══ -->
+  <div class="nv-section-title">
+    <i class="fas fa-folder-open"></i> Derniers Supports de Cours ajoutés
+  </div>
+  {% if derniers_supports %}
+    {% for s in derniers_supports %}
+    <div class="nv-card support">
+      <div class="nv-icon"><i class="fas fa-folder-open"></i></div>
+      <div class="nv-body">
+        <div class="nv-header">
+          <span class="nv-titre">Support — {{ s.code_mat }}</span>
+          <span class="nv-badge"><i class="fas fa-file-circle-plus"></i> Ajout</span>
+        </div>
+        <div class="nv-meta">
+          <span class="nv-tag"><i class="fas fa-barcode"></i> {{ s.code_support }}</span>
+          <span class="nv-tag"><i class="fas fa-book-open"></i> {{ s.code_mat }}</span>
+        </div>
+        {% if s.support_cours and s.support_cours != 'pas encore disponible' %}
+        <p class="nv-desc"><i class="fas fa-link"></i> Support disponible</p>
+        {% else %}
+        <p class="nv-desc"><i class="fas fa-hourglass-half"></i> Support pas encore disponible</p>
+        {% endif %}
+      </div>
+    </div>
+    {% endfor %}
+  {% else %}
+    <div class="nv-empty"><i class="fas fa-inbox"></i> Aucun support récent.</div>
+  {% endif %}
+
+<!-- ══ NOUVELLE MAQUETTE ══ -->
+  <div class="nv-section-title">
+    <i class="fas fa-wand-magic-sparkles"></i> Nouvelle Maquette — Matières actives
+  </div>
+  {% if nouvelle_maquette %}
+    {% for m in nouvelle_maquette %}
+    <div class="nv-card nouveau" style="border-left-color: #0891b2;">
+      <div class="nv-icon" style="background:#cffafe; color:#0891b2;">
+        <i class="fas fa-book-open"></i>
+      </div>
+      <div class="nv-body">
+        <div class="nv-header">
+          <span class="nv-titre">{{ m.nom_mat }}</span>
+          <span class="nv-badge" style="background:#cffafe; color:#0891b2;">
+            <i class="fas fa-rotate"></i> Nouvelle maquette
+          </span>
+        </div>
+        <div class="nv-meta">
+          <span class="nv-tag"><i class="fas fa-barcode"></i> {{ m.code_mat }}</span>
+          <span class="nv-tag"><i class="fas fa-tag"></i> {{ m.type_mat }}</span>
+          <span class="nv-tag"><i class="fas fa-clock"></i> Semestre {{ m.sem_mat }}</span>
+          <span class="nv-tag"><i class="fas fa-star"></i> {{ m.credit }} crédits</span>
+        </div>
+      </div>
+    </div>
+    {% endfor %}
+  {% else %}
+    <div class="nv-empty"><i class="fas fa-inbox"></i> Aucune matière de nouvelle maquette.</div>
+  {% endif %}
+
+</div>
+{% endblock %}

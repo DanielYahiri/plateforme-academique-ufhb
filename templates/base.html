@@ -59,6 +59,13 @@
     <li><a href="/soumettre" class="nav-item nav-cta {% block nav_soumettre %}{% endblock %}"><i class="fas fa-upload"></i> Soumettre</a></li>
     <li><a href="/feedback" class="nav-item {% block nav_feedback %}{% endblock %}"><i class="fas fa-comment-dots"></i> Feedback</a></li>
 
+    <!-- ✅ ONGLET NOUVEAUTÉS -->
+    <li>
+      <a href="/nouveautes" class="nav-item {% block nav_nouveautes %}{% endblock %}">
+        <i class="fas fa-bell"></i> Nouveautés
+      </a>
+    </li>
+
     <!-- NON CONNECTÉ : Inscription + Connexion -->
     <li id="nav-inscription" style="display:none;">
       <a href="/inscription" class="nav-item {% block nav_inscription %}{% endblock %}">
@@ -71,26 +78,26 @@
       </a>
     </li>
 
-   <!-- CONNECTÉ : Profil dropdown -->
-<li id="nav-profil" class="nav-dropdown" style="display:none;">
-  <a class="nav-item nav-profil-btn">
-    <i class="fas fa-user-tie"></i>
-    <span id="nav-user-name">Mon compte</span> ▾
-  </a>
-  <ul class="dropdown-menu">
-    <li>
-      <a href="/profil"><i class="fas fa-user-tie"></i> Mon profil</a>
-    </li>
-    <li id="nav-admin-link" style="display:none;">
-      <a href="/dashboard-admin"><i class="fas fa-users-gear"></i> Admin</a>
-    </li>
-    <li>
-      <a href="#" onclick="deconnexion(event)">
-        <i class="fas fa-right-from-bracket"></i> Se déconnecter
+    <!-- CONNECTÉ : Profil dropdown -->
+    <li id="nav-profil" class="nav-dropdown" style="display:none;">
+      <a class="nav-item nav-profil-btn">
+        <i class="fas fa-user-tie"></i>
+        <span id="nav-user-name">Mon compte</span> ▾
       </a>
+      <ul class="dropdown-menu">
+        <li>
+          <a href="/profil"><i class="fas fa-user-tie"></i> Mon profil</a>
+        </li>
+        <li id="nav-admin-link" style="display:none;">
+          <a href="/dashboard-admin"><i class="fas fa-users-gear"></i> Admin</a>
+        </li>
+        <li>
+          <a href="#" onclick="deconnexion(event)">
+            <i class="fas fa-right-from-bracket"></i> Se déconnecter
+          </a>
+        </li>
+      </ul>
     </li>
-  </ul>
-</li>
   </ul>
 </nav>
 
@@ -120,7 +127,6 @@
 <script src="/static/js/app.js"></script>
 
 <script>
-// ── NAVBAR DYNAMIQUE ──────────────────────────────────────────────────────────
 document.addEventListener("DOMContentLoaded", () => {
   let user = null;
   try { user = JSON.parse(localStorage.getItem("user")); } catch {}
@@ -132,41 +138,31 @@ document.addEventListener("DOMContentLoaded", () => {
   const elUserName    = document.getElementById("nav-user-name");
 
   if (user) {
-    // Connecté : afficher profil, cacher inscription/connexion
     elInscription.style.display = "none";
     elConnexion.style.display   = "none";
     elProfil.style.display      = "list-item";
 
-    // Afficher le prénom, nom ou email selon ce qui est disponible
     const label = user.prenom || user.nom || user.email || "Mon compte";
     elUserName.textContent = label;
 
-    // Afficher le lien Admin uniquement si role === "admin"
     if (user.role === "admin" && elAdmin) {
       elAdmin.style.display = "list-item";
     }
-
   } else {
-    // Non connecté : afficher inscription/connexion, cacher profil
     elInscription.style.display = "list-item";
     elConnexion.style.display   = "list-item";
     elProfil.style.display      = "none";
   }
 });
 
-// ── DÉCONNEXION ───────────────────────────────────────────────────────────────
 function deconnexion(e) {
   e.preventDefault();
-  // Effacer localStorage et sessionStorage
   localStorage.removeItem("user");
   sessionStorage.removeItem("redirect_after_login");
-  // Effacer les cookies user_role et user_id
   document.cookie = "user_role=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/;";
   document.cookie = "user_id=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/;";
-  // Rediriger vers connexion
   window.location.href = "/connexion";
 }
-// ─────────────────────────────────────────────────────────────────────────────
 </script>
 
 {% block scripts %}{% endblock %}

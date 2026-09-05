@@ -3,3 +3,8 @@
 *.pyc
 .env
 
+# Personal notebooks and course exercises
+*.ipynb
+*webscrap*
+*Python_avanc*
+

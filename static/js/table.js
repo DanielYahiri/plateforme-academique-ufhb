@@ -136,6 +136,10 @@ function renderTable(data) {
       if (FILE_COLUMNS.includes(c) && isFileUrl(v)) {
         return `<td>${makeDownloadBtn(v)}</td>`;
       }
+      // Le code matière renvoie vers la pochette de la matière
+      if (c === 'code_mat' && v) {
+        return `<td><a href="/matieres/${encodeURIComponent(v)}" class="code-mat-link">${escHtml(String(v))}</a></td>`;
+      }
       return `<td>${v === null || v === undefined
         ? '<span style="color:#aaa">—</span>'
         : escHtml(String(v))}</td>`;

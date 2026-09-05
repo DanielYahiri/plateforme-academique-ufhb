@@ -28,6 +28,10 @@
         <i class="fas fa-right-to-bracket"></i> Se connecter
       </button>
 
+      <p style="text-align:center;margin:14px 0 0;font-size:13px;">
+        <a href="#" id="forgotPasswordLink" style="color:#2E86C1;font-weight:600;">Mot de passe oublié ?</a>
+      </p>
+
       <p style="text-align:center;margin-top:18px;font-size:13px;color:#7F8C8D;">
         Pas encore de compte ? <a href="/inscription" style="color:#2E86C1;font-weight:600;">S'inscrire</a>
       </p>
@@ -57,6 +61,17 @@ document.addEventListener("DOMContentLoaded", () => {
     banner.innerHTML = "🔒 Connectez-vous pour accéder à cette section.";
     const form = document.querySelector("form");
     if (form) form.insertAdjacentElement("beforebegin", banner);
+  }
+
+  const forgotLink = document.getElementById('forgotPasswordLink');
+  if (forgotLink) {
+    forgotLink.addEventListener('click', function (event) {
+      event.preventDefault();
+      const emailInput = document.querySelector('input[name="email"]');
+      const email = emailInput ? emailInput.value.trim() : '';
+      const target = email ? `/mot-de-passe-oublie?email=${encodeURIComponent(email)}` : '/mot-de-passe-oublie';
+      window.location.href = target;
+    });
   }
 });
 // ─────────────────────────────────────────────────────────

@@ -1,0 +1,47 @@
+{% extends "base.html" %}
+{% block title %}{% if matiere %}{{ matiere.nom_mat }}{% else %}Matière{% endif %} — Plateforme Académique{% endblock %}
+{% block nav_ref %}active{% endblock %}
+
+{% block content %}
+<div class="page-container">
+  <a href="/matieres" class="btn btn-secondary" style="margin-bottom:20px;display:inline-flex">
+    <i class="fas fa-arrow-left"></i> Matières
+  </a>
+
+  {% if matiere %}
+  <div class="page-header">
+    <div>
+      <h1 class="page-title">{{ matiere.nom_mat }}</h1>
+      <p class="page-sub">
+        {{ matiere.niveau_scolaire }}{% if matiere.type_mat %} · {{ matiere.type_mat }}{% endif %}
+      </p>
+    </div>
+  </div>
+
+  <div class="pochette-grid">
+    <a href="/td?matiere={{ code_mat }}" class="pochette-folder folder-vert">
+      <div class="pochette-icone"><i class="fas fa-pen"></i></div>
+      <p class="pochette-titre">Travaux Dirigés</p>
+      <p class="pochette-count">{{ compteurs.td }} fichier{{ 's' if compteurs.td != 1 else '' }}</p>
+    </a>
+    <a href="/devoirs?matiere={{ code_mat }}" class="pochette-folder folder-rouge">
+      <div class="pochette-icone"><i class="fas fa-file-lines"></i></div>
+      <p class="pochette-titre">Devoirs</p>
+      <p class="pochette-count">{{ compteurs.devoirs }} fichier{{ 's' if compteurs.devoirs != 1 else '' }}</p>
+    </a>
+    <a href="/examens?matiere={{ code_mat }}" class="pochette-folder folder-bleu">
+      <div class="pochette-icone"><i class="fas fa-graduation-cap"></i></div>
+      <p class="pochette-titre">Examens</p>
+      <p class="pochette-count">{{ compteurs.examens }} fichier{{ 's' if compteurs.examens != 1 else '' }}</p>
+    </a>
+    <a href="/supports?matiere={{ code_mat }}" class="pochette-folder folder-violet">
+      <div class="pochette-icone"><i class="fas fa-folder-open"></i></div>
+      <p class="pochette-titre">Supports de Cours</p>
+      <p class="pochette-count">{{ compteurs.supports }} fichier{{ 's' if compteurs.supports != 1 else '' }}</p>
+    </a>
+  </div>
+  {% else %}
+  <p class="filter-none">Matière introuvable pour le code « {{ code_mat }} ».</p>
+  {% endif %}
+</div>
+{% endblock %}

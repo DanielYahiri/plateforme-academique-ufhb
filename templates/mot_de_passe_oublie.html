@@ -1,0 +1,70 @@
+{% extends "base.html" %}
+{% block title %}Mot de passe oublié — Plateforme Académique{% endblock %}
+
+{% block content %}
+<div class="form-page-container">
+  <div class="form-hero" style="background:linear-gradient(135deg,#1A5276,#2E86C1);">
+    <h1><i class="fas fa-key"></i> Mot de passe oublié</h1>
+    <p>Recevez un lien pour choisir un nouveau mot de passe.</p>
+  </div>
+  <div class="form-card">
+    <div id="formAlert" class="form-alert hidden"></div>
+    <form id="resetRequestForm">
+      <div class="form-group">
+        <label>Adresse email <span class="req">*</span></label>
+        <input type="email" name="email" id="resetEmail" required placeholder="email@exemple.com" readonly>
+      </div>
+      <button type="submit" class="btn btn-primary btn-lg btn-full">
+        <i class="fas fa-paper-plane"></i> Envoyer le lien
+      </button>
+      <p style="text-align:center;margin-top:18px;font-size:13px;">
+        <a href="/connexion" style="color:#2E86C1;font-weight:600;">Retour à la connexion</a>
+      </p>
+      <p style="text-align:center;margin-top:10px;font-size:13px;">
+        <a href="/inscription" style="color:#2E86C1;font-weight:600;">Créer un compte</a>
+      </p>
+    </form>
+  </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+const params = new URLSearchParams(window.location.search);
+const emailPrefill = params.get('email');
+const emailInput = document.getElementById('resetEmail');
+
+if (emailPrefill) {
+  if (emailInput) {
+    emailInput.value = emailPrefill;
+    emailInput.readOnly = true;
+    emailInput.setAttribute('aria-readonly', 'true');
+  }
+} else if (emailInput) {
+  emailInput.readOnly = false;
+}
+
+const resetForm = document.getElementById('resetRequestForm');
+
+resetForm.addEventListener('submit', async function (event) {
+  event.preventDefault();
+  const email = document.getElementById('resetEmail').value.trim();
+  const response = await fetch('/api/auth/mot-de-passe-oublie', {
+    method: 'POST',
+    headers: {'Content-Type': 'application/json'},
+    body: JSON.stringify({email})
+  });
+  const data = await response.json();
+  const alert = document.getElementById('formAlert');
+  alert.className = 'form-alert ' + (response.ok ? 'form-alert-success' : 'form-alert-error');
+  alert.textContent = data.message || data.detail || 'Une erreur est survenue.';
+
+  if (response.ok) {
+    const link = resetForm.querySelector('a[href="/inscription"]');
+    if (link) {
+      link.style.display = 'inline';
+    }
+  }
+});
+</script>
+{% endblock %}

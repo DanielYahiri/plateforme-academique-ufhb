@@ -106,4 +106,23 @@ const COL_LABELS = {
 };
 </script>
 <script src="/static/js/table.js"></script>
+<script>
+// Pré-filtrage automatique si on arrive depuis une page pochette matière
+(async function () {
+  const matiere = new URLSearchParams(window.location.search).get("matiere");
+  if (!matiere || !API_POST) return;
+  try {
+    const r = await fetch(API_POST, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ p_code_mat: matiere }),
+    });
+    const data = await r.json();
+    ALL_DATA = data;
+    renderTable(data);
+  } catch (e) {
+    console.error("Filtrage matière échoué :", e);
+  }
+})();
+</script>
 {% endblock %}

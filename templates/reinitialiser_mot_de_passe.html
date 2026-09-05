@@ -1,0 +1,51 @@
+{% extends "base.html" %}
+{% block title %}Nouveau mot de passe — Plateforme Académique{% endblock %}
+
+{% block content %}
+<div class="form-page-container">
+  <div class="form-hero" style="background:linear-gradient(135deg,#1A5276,#2E86C1);">
+    <h1><i class="fas fa-lock"></i> Nouveau mot de passe</h1>
+    <p>Choisissez un nouveau mot de passe pour votre compte.</p>
+  </div>
+  <div class="form-card">
+    <div id="formAlert" class="form-alert hidden"></div>
+    <form id="resetForm">
+      <div class="form-group">
+        <label>Nouveau mot de passe <span class="req">*</span></label>
+        <input type="password" name="mot_de_passe" minlength="6" required placeholder="Au moins 6 caractères">
+      </div>
+      <div class="form-group">
+        <label>Confirmer le mot de passe <span class="req">*</span></label>
+        <input type="password" id="confirmation" minlength="6" required placeholder="Répétez le mot de passe">
+      </div>
+      <button type="submit" class="btn btn-primary btn-lg btn-full">
+        <i class="fas fa-check"></i> Enregistrer
+      </button>
+    </form>
+  </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+document.getElementById('resetForm').addEventListener('submit', async function (event) {
+  event.preventDefault();
+  const password = new FormData(this).get('mot_de_passe');
+  const alert = document.getElementById('formAlert');
+  if (password !== document.getElementById('confirmation').value) {
+    alert.className = 'form-alert form-alert-error';
+    alert.textContent = 'Les deux mots de passe ne correspondent pas.';
+    return;
+  }
+  const response = await fetch('/api/auth/reinitialiser-mot-de-passe', {
+    method: 'POST',
+    headers: {'Content-Type': 'application/json'},
+    body: JSON.stringify({token: new URLSearchParams(location.search).get('token'), mot_de_passe: password})
+  });
+  const data = await response.json();
+  alert.className = 'form-alert ' + (response.ok ? 'form-alert-success' : 'form-alert-error');
+  alert.textContent = data.message || data.detail || 'Une erreur est survenue.';
+  if (response.ok) setTimeout(() => location.href = '/connexion', 1800);
+});
+</script>
+{% endblock %}

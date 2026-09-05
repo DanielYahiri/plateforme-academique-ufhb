@@ -48,6 +48,13 @@ a { text-decoration: none; color: inherit; }
   gap: 10px;
   cursor: pointer;
 }
+.nav-logo {
+  width: 42px;
+  height: 42px;
+  object-fit: cover;
+  border-radius: 8px;
+  background: white;
+}
 .nav-icon   { font-size: 26px; }
 .nav-title  { color: white; font-weight: 700; font-size: 15px; display: block; }
 .nav-sub    { color: rgba(255,255,255,.6); font-size: 11px; display: block; }
@@ -174,6 +181,23 @@ a { text-decoration: none; color: inherit; }
   margin-bottom: 28px;
 }
 .hero-actions { display: flex; gap: 12px; flex-wrap: wrap; }
+.hero-actions .btn {
+  padding: 11px 18px;
+  border-radius: 10px;
+  box-shadow: 0 8px 18px rgba(0, 0, 0, .14);
+  transition: transform .2s ease, box-shadow .2s ease, background .2s ease;
+}
+.hero-actions .btn:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 11px 22px rgba(0, 0, 0, .2);
+}
+.hero-actions .btn-secondary {
+  background: var(--accent);
+  color: var(--primary-dk);
+}
+.hero-actions .btn-secondary:hover {
+  background: #F4D03F;
+}
 .hero-image-wrap { position: relative; }
 .hero-img {
   width: 100%;
@@ -643,3 +667,47 @@ a { text-decoration: none; color: inherit; }
     display: block !important;
   }
 }
+/* ✅ BEAUTÉ DES NOMBRES — cartes vidéo */
+.video-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(260px,1fr));gap:24px;margin-top:24px}
+.video-card{background:#fff;border-radius:14px;overflow:hidden;box-shadow:0 2px 10px rgba(0,0,0,.06);transition:transform .2s}
+.video-card:nth-child(n+10){display:none}
+.video-card:nth-child(n+10).video-card-visible{display:block}
+.video-card:hover{transform:translateY(-3px)}
+.video-more-wrap{display:flex;justify-content:center;margin:28px 0 8px}
+.video-more-button{gap:9px}
+.video-thumb{position:relative;aspect-ratio:16/9;background:#eee;display:block}
+.video-thumb img{width:100%;height:100%;object-fit:cover;display:block}
+.video-thumb .fa-circle-play{position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);font-size:40px;color:#fff;text-shadow:0 2px 8px rgba(0,0,0,.5)}
+.video-duration{position:absolute;bottom:8px;right:8px;background:rgba(0,0,0,.75);color:#fff;font-size:11px;padding:2px 6px;border-radius:4px}
+.video-niveau{position:absolute;top:8px;left:8px;font-size:11px;font-weight:700;padding:3px 10px;border-radius:999px;color:#fff}
+.niveau-debutant{background:var(--success)}
+.niveau-intermediaire{background:var(--secondary)}
+.niveau-avance{background:var(--danger)}
+.video-body{padding:14px 16px}
+.video-title{font-size:15px;font-weight:700;color:var(--text);margin-bottom:6px}
+.video-tags{display:flex;flex-wrap:wrap;gap:6px;margin-bottom:10px}
+.video-tag{font-size:11px;color:var(--muted);background:#F4F6F7;border-radius:999px;padding:3px 9px}
+.video-excerpt{display:-webkit-box;box-orient:vertical;line-clamp:3;-webkit-box-orient:vertical;-webkit-line-clamp:3;overflow:hidden;color:var(--muted);font-size:13px;line-height:1.55;margin:0 0 12px}
+.video-resume-link{font-size:13px;color:var(--secondary);font-weight:600;text-decoration:none;display:inline-flex;align-items:center;gap:5px}
+.video-resume-link:hover{color:var(--primary)}
+
+/* ✅ PROMOTIONS — cartes graphiques */
+.chart-card{background:#fff;border-radius:14px;padding:20px 24px;margin-bottom:20px;box-shadow:0 2px 10px rgba(0,0,0,.06);position:relative;min-height:280px}
+.chart-title{font-size:15px;font-weight:700;color:var(--text);margin:0 0 14px}
+.chart-title-row{display:flex;align-items:center;justify-content:space-between;margin-bottom:14px}
+.chart-title-row .chart-title{margin:0}
+.chart-donut-wrap{max-width:260px;margin:0 auto}
+
+/* ✅ POCHETTE PAR MATIÈRE */
+.pochette-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(180px,1fr));gap:16px;margin-top:20px}
+.pochette-folder{background:#fff;border-radius:14px;padding:24px 16px;text-align:center;text-decoration:none;box-shadow:0 2px 10px rgba(0,0,0,.06);transition:transform .2s}
+.pochette-folder:hover{transform:translateY(-3px)}
+.pochette-icone{width:52px;height:52px;border-radius:50%;display:flex;align-items:center;justify-content:center;margin:0 auto 12px;font-size:20px}
+.folder-vert .pochette-icone{background:#E8F6EF;color:var(--success)}
+.folder-rouge .pochette-icone{background:#FBEAEA;color:var(--danger)}
+.folder-bleu .pochette-icone{background:#EAF2F8;color:var(--secondary)}
+.folder-violet .pochette-icone{background:#F1EAF7;color:var(--purple)}
+.pochette-titre{font-size:14px;font-weight:700;color:var(--text);margin:0 0 4px}
+.pochette-count{font-size:12px;color:var(--muted);margin:0}
+.code-mat-link{color:var(--secondary);font-weight:600;text-decoration:none}
+.code-mat-link:hover{text-decoration:underline}

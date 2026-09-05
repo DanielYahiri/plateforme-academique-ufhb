@@ -1,10 +1,15 @@
 from fastapi import APIRouter, HTTPException, Request
 from pydantic import BaseModel, EmailStr
 from typing import Optional
-from datetime import datetime
+from datetime import datetime, timedelta, timezone
 import bcrypt
+import resend
+from jose import JWTError, jwt
 import supabase_client as db
-from config import SUPABASE_URL, SUPABASE_ANON_KEY, SUPABASE_HEADERS
+from config import (
+    SUPABASE_URL, SUPABASE_ANON_KEY, SUPABASE_HEADERS, SUPABASE_SERVICE_KEY,
+    RESEND_API_KEY, EMAIL_EXPEDITEUR, APP_BASE_URL, PASSWORD_RESET_SECRET,
+)
 import httpx
 from fastapi.responses import JSONResponse, RedirectResponse
 
@@ -21,6 +26,13 @@ class InscriptionForm(BaseModel):
 
 class ConnexionForm(BaseModel):
     email:        EmailStr
+    mot_de_passe: str
+
+class DemandeReinitialisation(BaseModel):
+    email: EmailStr
+
+class NouveauMotDePasse(BaseModel):
+    token: str
     mot_de_passe: str
 
 # ── Helpers ───────────────────────────────────────────────────────────────────
@@ -77,6 +89,9 @@ async def update_connexion(user_id: int, ip: str):
 
 @router.post("/auth/inscription")
 async def inscription(data: InscriptionForm, request: Request):
+    if len(data.mot_de_passe) < 6:
+        raise HTTPException(status_code=400, detail="Le mot de passe doit contenir au moins 6 caractères.")
+
     # Vérifie si email déjà utilisé
     existant = await get_user_by_email(data.email)
     if existant:
@@ -88,7 +103,8 @@ async def inscription(data: InscriptionForm, request: Request):
         "prenoms":        data.prenoms,
         "email":          data.email,
         "mot_de_passe":   mdp_hash,
-        "role":           data.role,
+        # Un visiteur ne peut jamais choisir son rôle depuis le formulaire public.
+        "role":           "visiteur",
         "statut":         "actif",
         "date_inscription": datetime.utcnow().isoformat(),
         "ip_connexion":   request.client.host
@@ -123,17 +139,86 @@ async def connexion(data: ConnexionForm, request: Request):
     response.set_cookie(key="user_id", value=str(user["id"]), httponly=True)
     return response
 
+@router.post("/auth/mot-de-passe-oublie")
+async def demander_reinitialisation(data: DemandeReinitialisation):
+    user = await get_user_by_email(data.email)
+
+    if not user:
+        print(f"[RESET] Email inconnu: {data.email}")
+        return {"ok": True, "message": "Si cette adresse est associée à un compte, un lien de réinitialisation a été envoyé."}
+
+    if not RESEND_API_KEY:
+        print(f"[RESET] Clé Resend absente pour {data.email}")
+        return {"ok": False, "detail": "Le service d'email n'est pas configuré pour l'instant."}
+
+    if not EMAIL_EXPEDITEUR:
+        print(f"[RESET] Expéditeur email absent pour {data.email}")
+        return {"ok": False, "detail": "L'expéditeur email n'est pas configuré."}
+
+    try:
+        token = jwt.encode(
+            {"sub": str(user["id"]), "email": user["email"],
+             "exp": datetime.now(timezone.utc) + timedelta(minutes=30)},
+            PASSWORD_RESET_SECRET,
+            algorithm="HS256",
+        )
+        lien = f"{APP_BASE_URL}/reinitialiser-mot-de-passe?token={token}"
+        resend.api_key = RESEND_API_KEY
+        response = resend.Emails.send({
+            "from": f"Classe Étoile <{EMAIL_EXPEDITEUR}>",
+            "to": data.email,
+            "subject": "Réinitialisation de votre mot de passe",
+            "html": f"<p>Bonjour,</p><p>Cliquez sur le lien suivant pour choisir un nouveau mot de passe :</p><p><a href=\"{lien}\">Réinitialiser mon mot de passe</a></p><p>Ce lien expire dans 30 minutes.</p>",
+        })
+        print(f"[RESET] Email envoyé à {data.email} -> {response}")
+    except Exception as exc:
+        print(f"[RESET] ERREUR ENVOI EMAIL pour {data.email}: {exc}")
+        return {"ok": False, "detail": "Impossible d'envoyer le mail pour le moment."}
+
+    return {"ok": True, "message": "Si cette adresse est associée à un compte, un lien de réinitialisation a été envoyé."}
+
+@router.post("/auth/reinitialiser-mot-de-passe")
+async def appliquer_reinitialisation(data: NouveauMotDePasse):
+    if len(data.mot_de_passe) < 6:
+        raise HTTPException(status_code=400, detail="Le mot de passe doit contenir au moins 6 caractères.")
+    try:
+        payload = jwt.decode(data.token, PASSWORD_RESET_SECRET, algorithms=["HS256"])
+        user_id = int(payload["sub"])
+    except (JWTError, KeyError, ValueError):
+        raise HTTPException(status_code=400, detail="Le lien de réinitialisation est invalide ou expiré.")
+
+    url = f"{SUPABASE_URL}/rest/v1/utilisateurs"
+    headers = {
+        "apikey": SUPABASE_SERVICE_KEY,
+        "Authorization": f"Bearer {SUPABASE_SERVICE_KEY}",
+        "Content-Type": "application/json",
+        "Content-Profile": "auth_app",
+    }
+    async with httpx.AsyncClient(timeout=15) as client:
+        response = await client.patch(
+            url,
+            headers=headers,
+            params={"id": f"eq.{user_id}"},
+            json={"mot_de_passe": hasher_mdp(data.mot_de_passe)},
+        )
+    response.raise_for_status()
+    return {"ok": True, "message": "Mot de passe réinitialisé. Vous pouvez vous connecter."}
+
 
 @router.get("/auth/utilisateurs")
-async def get_utilisateurs():
+async def get_utilisateurs(request: Request):
     """Tableau de bord admin — liste tous les utilisateurs"""
+    if request.cookies.get("user_role") != "admin":
+        raise HTTPException(status_code=403, detail="Accès administrateur requis.")
     return await db.fetch_view("vue_utilisateurs", "auth_app")
 
 class ChangerRole(BaseModel):
     role: str
 
 @router.patch("/auth/role/{user_id}")
-async def changer_role(user_id: int, data: ChangerRole):
+async def changer_role(user_id: int, data: ChangerRole, request: Request):
+    if request.cookies.get("user_role") != "admin":
+        raise HTTPException(status_code=403, detail="Accès administrateur requis.")
     from config import SUPABASE_URL, SUPABASE_HEADERS
     import httpx
     h = SUPABASE_HEADERS.copy()
@@ -157,7 +242,9 @@ class ModifierProfil(BaseModel):
     ancien_mot_de_passe: Optional[str] = None
 
 @router.patch("/auth/profil/{user_id}")
-async def modifier_profil(user_id: int, data: ModifierProfil):
+async def modifier_profil(user_id: int, data: ModifierProfil, request: Request):
+    if request.cookies.get("user_id") != str(user_id):
+        raise HTTPException(status_code=403, detail="Vous ne pouvez modifier que votre propre profil.")
     from config import SUPABASE_URL, SUPABASE_HEADERS
     import httpx
 

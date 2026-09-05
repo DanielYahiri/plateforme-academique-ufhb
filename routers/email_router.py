@@ -3,7 +3,7 @@ from pydantic import BaseModel, EmailStr
 from typing import Optional
 import resend
 from datetime import datetime
-from config import RESEND_API_KEY, EMAIL_DESTINATAIRE, APP_NAME
+from config import RESEND_API_KEY, EMAIL_DESTINATAIRE, EMAIL_EXPEDITEUR, APP_NAME
 
 router = APIRouter(tags=["email"])
 
@@ -33,7 +33,7 @@ resend.api_key = RESEND_API_KEY
 
 async def send_email(to: str, subject: str, html_body: str):
     resend.Emails.send({
-        "from": "Classe Étoile <onboarding@resend.dev>",
+        "from": f"Classe Étoile <{EMAIL_EXPEDITEUR}>",
         "to": to,
         "subject": subject,
         "html": html_body,

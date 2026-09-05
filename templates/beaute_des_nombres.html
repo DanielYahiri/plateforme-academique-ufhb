@@ -1,0 +1,58 @@
+{% extends "base.html" %}
+{% block title %}Beauté des Nombres — Plateforme Académique{% endblock %}
+{% block nav_culture %}active{% endblock %}
+
+{% block content %}
+<div class="page-container">
+  <div class="page-header">
+    <div>
+      <h1 class="page-title"><i class="fas fa-infinity"></i> Beauté des Nombres</h1>
+      <p class="page-sub">Découvrez les mathématiques par le prisme de l'histoire, des grandes idées et des secrets cachés derrière les nombres.</p>
+    </div>
+  </div>
+
+  {% if videos and videos|length > 0 %}
+  <div class="video-grid">
+    {% for v in videos %}
+    <div class="video-card">
+      <a class="video-thumb" href="https://www.youtube.com/watch?v={{ v.youtube_id }}" target="_blank" rel="noopener noreferrer">
+        <img src="https://img.youtube.com/vi/{{ v.youtube_id }}/hqdefault.jpg" alt="{{ v.titre_affiche or v.titre_original }}">
+        <i class="fas fa-circle-play"></i>
+        {% if v.niveau %}<span class="video-niveau {{ v.niveau_classe }}">{{ v.niveau }}</span>{% endif %}
+        {% if v.duree %}<span class="video-duration">{{ v.duree }}</span>{% endif %}
+      </a>
+      <div class="video-body">
+        <p class="video-title">{{ v.titre_affiche or v.titre_original }}</p>
+        {% if v.tags %}
+        <div class="video-tags">
+          {% for tag in v.tags %}<span class="video-tag">{{ tag }}</span>{% endfor %}
+        </div>
+        {% endif %}
+        {% if v.resume_ia %}<p class="video-excerpt">{{ v.resume_ia }}</p>{% endif %}
+        <a href="/beaute-des-nombres/{{ v.youtube_id }}" class="video-resume-link">Découvrir l’histoire <i class="fas fa-compass"></i></a>
+      </div>
+    </div>
+    {% endfor %}
+  </div>
+  {% if videos|length > 9 %}
+  <div class="video-more-wrap">
+    <button type="button" class="btn btn-secondary video-more-button" id="video-more-button">
+      Voir + <i class="fas fa-chevron-down"></i>
+    </button>
+  </div>
+  {% endif %}
+  {% else %}
+  <p class="filter-none">Aucune vidéo pour le moment.</p>
+  {% endif %}
+</div>
+{% if videos and videos|length > 9 %}
+<script>
+  document.getElementById('video-more-button').addEventListener('click', function () {
+    document.querySelectorAll('.video-card:nth-child(n+10)').forEach(function (card) {
+      card.classList.add('video-card-visible');
+    });
+    this.remove();
+  });
+</script>
+{% endif %}
+{% endblock %}

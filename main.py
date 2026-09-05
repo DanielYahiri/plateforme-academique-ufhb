@@ -38,5 +38,5 @@ from fastapi.responses import FileResponse
 
 @app.get('/favicon.ico', include_in_schema=False)
 async def favicon():
-    # Assurez-vous que le chemin correspond à l'endroit où vous avez mis l'image
+    # le chemin doit correspond à l'endroit où  l'image est
     return FileResponse("static/img/logo_ufhb.png")

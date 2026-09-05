@@ -12,6 +12,21 @@
     <button class="btn btn-primary" onclick="loadData()"><i class="fas fa-rotate-right"></i> Actualiser</button>
   </div>
 
+  <div class="chart-card">
+    <h3 class="chart-title">Évolution par promotion</h3>
+    <canvas id="chartBarres" height="90"></canvas>
+  </div>
+
+  <div class="chart-card">
+    <div class="chart-title-row">
+      <h3 class="chart-title">Répartition par année</h3>
+      <select id="filtreAnnee" class="filter-select"></select>
+    </div>
+    <div class="chart-donut-wrap">
+      <canvas id="chartCamembert"></canvas>
+    </div>
+  </div>
+
   <div class="filter-bar">
     <span class="filter-none">Vue de référence — pas de filtre disponible</span>
   </div>
@@ -62,5 +77,54 @@ const COL_LABELS = {
   "nombre_homme_admis":"Hommes","nombre_femme_admises":"Femmes"
 };
 </script>
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.4/dist/chart.umd.min.js"></script>
 <script src="/static/js/table.js"></script>
+<script>
+let chartBarres = null;
+let chartCamembert = null;
+
+async function chargerGraphiques() {
+  const r = await fetch(API_GET);
+  const data = await r.json();
+  if (!Array.isArray(data) || data.length === 0) return;
+
+  data.sort((a, b) => a.annee_de_sortie - b.annee_de_sortie);
+  const COULEUR_H = "#1A5276";
+  const COULEUR_F = "#F39C12";
+
+  if (chartBarres) chartBarres.destroy();
+  chartBarres = new Chart(document.getElementById("chartBarres"), {
+    type: "bar",
+    data: {
+      labels: data.map(p => p.annee_de_sortie),
+      datasets: [
+        { label: "Hommes", data: data.map(p => p.nombre_homme_admis), backgroundColor: COULEUR_H },
+        { label: "Femmes", data: data.map(p => p.nombre_femme_admises), backgroundColor: COULEUR_F },
+      ],
+    },
+    options: { responsive: true, plugins: { legend: { position: "bottom" } } },
+  });
+
+  const select = document.getElementById("filtreAnnee");
+  select.innerHTML = data.map(p => `<option value="${p.annee_de_sortie}">${p.annee_de_sortie}</option>`).join("");
+  select.value = data[data.length - 1].annee_de_sortie;
+
+  function dessinerCamembert(annee) {
+    const p = data.find(x => String(x.annee_de_sortie) === String(annee));
+    if (!p) return;
+    if (chartCamembert) chartCamembert.destroy();
+    chartCamembert = new Chart(document.getElementById("chartCamembert"), {
+      type: "pie",
+      data: {
+        labels: ["Hommes", "Femmes"],
+        datasets: [{ data: [p.nombre_homme_admis, p.nombre_femme_admises], backgroundColor: [COULEUR_H, COULEUR_F] }],
+      },
+      options: { responsive: true, plugins: { legend: { position: "bottom" } } },
+    });
+  }
+  dessinerCamembert(select.value);
+  select.onchange = () => dessinerCamembert(select.value);
+}
+chargerGraphiques();
+</script>
 {% endblock %}

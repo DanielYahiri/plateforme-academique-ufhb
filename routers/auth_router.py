@@ -201,6 +201,34 @@ async def appliquer_reinitialisation(data: NouveauMotDePasse):
             params={"id": f"eq.{user_id}"},
             json={"mot_de_passe": hasher_mdp(data.mot_de_passe)},
         )
+
+    if response.status_code >= 400:
+        print(f"[RESET] Supabase a répondu {response.status_code}: {response.text}")
+        raise HTTPException(status_code=502, detail=f"Erreur Supabase ({response.status_code}): {response.text}")
+
+    return {"ok": True, "message": "Mot de passe réinitialisé. Vous pouvez vous connecter."}
+    if len(data.mot_de_passe) < 6:
+        raise HTTPException(status_code=400, detail="Le mot de passe doit contenir au moins 6 caractères.")
+    try:
+        payload = jwt.decode(data.token, PASSWORD_RESET_SECRET, algorithms=["HS256"])
+        user_id = int(payload["sub"]) 
+    except (JWTError, KeyError, ValueError):
+        raise HTTPException(status_code=400, detail="Le lien de réinitialisation est invalide ou expiré.")
+
+    url = f"{SUPABASE_URL}/rest/v1/utilisateurs"
+    headers = {
+        "apikey": SUPABASE_SERVICE_KEY,
+        "Authorization": f"Bearer {SUPABASE_SERVICE_KEY}",
+        "Content-Type": "application/json",
+        "Content-Profile": "auth_app",
+    }
+    async with httpx.AsyncClient(timeout=15) as client:
+        response = await client.patch(
+            url,
+            headers=headers,
+            params={"id": f"eq.{user_id}"},
+            json={"mot_de_passe": hasher_mdp(data.mot_de_passe)},
+        )
     response.raise_for_status()
     return {"ok": True, "message": "Mot de passe réinitialisé. Vous pouvez vous connecter."}
 

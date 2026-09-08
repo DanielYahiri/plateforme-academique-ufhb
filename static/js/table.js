@@ -177,4 +177,7 @@ function escHtml(str) {
     .replace(/>/g, '&gt;');
 }
 
-document.addEventListener('DOMContentLoaded', loadData);
+document.addEventListener('DOMContentLoaded', () => {
+  const matiereParam = new URLSearchParams(window.location.search).get('matiere');
+  if (!matiereParam) loadData(); // sinon, c'est le script de la page qui s'en charge (filtré)
+});

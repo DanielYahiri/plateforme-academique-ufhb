@@ -2,9 +2,11 @@ from fastapi import APIRouter, Request
 from fastapi.templating import Jinja2Templates
 from fastapi.responses import RedirectResponse
 import supabase_client as db
+import config
 
 router = APIRouter()
 templates = Jinja2Templates(directory="templates")
+templates.env.globals["ASSET_VERSION"] = config.ASSET_VERSION
 
 @router.get("/")
 async def home(request: Request):

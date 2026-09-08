@@ -19,26 +19,65 @@
   </div>
 
   <div class="pochette-grid">
+    {% if compteurs.td > 0 %}
     <a href="/td?matiere={{ code_mat }}" class="pochette-folder folder-vert">
-      <div class="pochette-icone"><i class="fas fa-pen"></i></div>
+      <div class="pochette-icone"><i class="fas fa-chalkboard-teacher"></i></div>
       <p class="pochette-titre">Travaux Dirigés</p>
       <p class="pochette-count">{{ compteurs.td }} fichier{{ 's' if compteurs.td != 1 else '' }}</p>
     </a>
+    {% else %}
+    <div class="pochette-folder folder-vert pochette-vide">
+      <div class="pochette-icone"><i class="fas fa-chalkboard-teacher"></i></div>
+      <p class="pochette-titre">Travaux Dirigés</p>
+      <p class="pochette-count">Support pas encore disponible</p>
+      <a href="/soumettre" class="pochette-cta">Tu en as un ? Partage-le <i class="fas fa-arrow-right"></i></a>
+    </div>
+    {% endif %}
+
+    {% if compteurs.devoirs > 0 %}
     <a href="/devoirs?matiere={{ code_mat }}" class="pochette-folder folder-rouge">
-      <div class="pochette-icone"><i class="fas fa-file-lines"></i></div>
+      <div class="pochette-icone"><i class="fas fa-book"></i></div>
       <p class="pochette-titre">Devoirs</p>
       <p class="pochette-count">{{ compteurs.devoirs }} fichier{{ 's' if compteurs.devoirs != 1 else '' }}</p>
     </a>
+    {% else %}
+    <div class="pochette-folder folder-rouge pochette-vide">
+      <div class="pochette-icone"><i class="fas fa-book"></i></div>
+      <p class="pochette-titre">Devoirs</p>
+      <p class="pochette-count">Support pas encore disponible</p>
+      <a href="/soumettre" class="pochette-cta">Tu en as un ? Partage-le <i class="fas fa-arrow-right"></i></a>
+    </div>
+    {% endif %}
+
+    {% if compteurs.examens > 0 %}
     <a href="/examens?matiere={{ code_mat }}" class="pochette-folder folder-bleu">
-      <div class="pochette-icone"><i class="fas fa-graduation-cap"></i></div>
+      <div class="pochette-icone"><i class="fas fa-file-alt"></i></div>
       <p class="pochette-titre">Examens</p>
       <p class="pochette-count">{{ compteurs.examens }} fichier{{ 's' if compteurs.examens != 1 else '' }}</p>
     </a>
+    {% else %}
+    <div class="pochette-folder folder-bleu pochette-vide">
+      <div class="pochette-icone"><i class="fas fa-file-alt"></i></div>
+      <p class="pochette-titre">Examens</p>
+      <p class="pochette-count">Support pas encore disponible</p>
+      <a href="/soumettre" class="pochette-cta">Tu en as un ? Partage-le <i class="fas fa-arrow-right"></i></a>
+    </div>
+    {% endif %}
+
+    {% if compteurs.supports > 0 %}
     <a href="/supports?matiere={{ code_mat }}" class="pochette-folder folder-violet">
       <div class="pochette-icone"><i class="fas fa-folder-open"></i></div>
       <p class="pochette-titre">Supports de Cours</p>
       <p class="pochette-count">{{ compteurs.supports }} fichier{{ 's' if compteurs.supports != 1 else '' }}</p>
     </a>
+    {% else %}
+    <div class="pochette-folder folder-violet pochette-vide">
+      <div class="pochette-icone"><i class="fas fa-folder-open"></i></div>
+      <p class="pochette-titre">Supports de Cours</p>
+      <p class="pochette-count">Support pas encore disponible</p>
+      <a href="/soumettre" class="pochette-cta">Tu en as un ? Partage-le <i class="fas fa-arrow-right"></i></a>
+    </div>
+    {% endif %}
   </div>
   {% else %}
   <p class="filter-none">Matière introuvable pour le code « {{ code_mat }} ».</p>

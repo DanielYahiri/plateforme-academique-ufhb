@@ -6,16 +6,16 @@
 <div class="page-container">
   <div class="page-header">
     <div>
-      <h1 class="page-title">🗂️  Matières (UE) par Niveau</h1>
+      <h1 class="page-title">🗂️  Matières (UE) </h1>
       <p class="page-sub">Unités d'enseignement par niveau et semestre</p>
     </div>
-    <button class="btn btn-primary" onclick="loadData()"><i class="fas fa-rotate-right"></i> Actualiser</button>
+    <button class="btn btn-primary" onclick="chargerMatieres()"><i class="fas fa-rotate-right"></i> Actualiser</button>
   </div>
 
   <div class="filter-bar">
     <div class="filter-group">
       <label class="filter-label">Niveau</label>
-      <select class="filter-select" data-key="p_niveau_scolaire">
+      <select class="filter-select" id="filtreNiveau">
         <option value="">Tous</option>
         <option value="L1">L1</option>
         <option value="L2">L2</option>
@@ -24,36 +24,23 @@
     </div>
     <div class="filter-group">
       <label class="filter-label">Semestre</label>
-      <select class="filter-select" data-key="p_sem_mat">
+      <select class="filter-select" id="filtreSemestre">
         <option value="">Tous</option>
         <option value="1">Semestre 1</option>
         <option value="2">Semestre 2</option>
       </select>
     </div>
     <div class="filter-actions">
-      <button class="btn btn-secondary" onclick="applyFilter()"><i class="fas fa-magnifying-glass"></i> Filtrer</button>
-      <button class="btn btn-danger-outline" onclick="resetFilter()"><i class="fas fa-rotate-left"></i> Réinitialiser</button>
+      <button class="btn btn-secondary" onclick="appliquerFiltreMatieres()"><i class="fas fa-magnifying-glass"></i> Filtrer</button>
+      <button class="btn btn-danger-outline" onclick="reinitialiserFiltreMatieres()"><i class="fas fa-rotate-left"></i> Réinitialiser</button>
     </div>
   </div>
 
-  <div class="table-toolbar">
-    <input type="text" class="search-input" id="searchInput"
-           placeholder="🔍 Rechercher dans les résultats..."
-           oninput="localSearch(this.value)">
-    <span class="count-badge" id="countBadge">0 résultats</span>
+  <div id="matieresLoading" class="table-loading">
+    <div class="spinner"></div><span>Chargement…</span>
   </div>
-
-  <div class="table-wrap">
-    <div class="table-loading" id="tableLoading">
-      <div class="spinner"></div><span>Chargement…</span>
-    </div>
-    <div id="tableEmpty" class="table-empty hidden">Aucune donnée.</div>
-    <div id="tableError" class="table-error hidden"></div>
-    <table class="data-table" id="dataTable">
-      <thead id="tableHead"></thead>
-      <tbody id="tableBody"></tbody>
-    </table>
-  </div>
+  <div id="matieresEmpty" class="table-empty hidden">Aucune matière trouvée.</div>
+  <div id="matieresGrid" class="matieres-grid"></div>
 </div>
 {% endblock %}
 
@@ -72,15 +59,6 @@
     window.location.replace("/connexion?message=connexion_requise");
   }
 })();
-// ─────────────────────────────────────────────────────────
-
-const API_GET  = "/api/matieres";
-const API_POST = "/api/matieres/filter";
-const COL_LABELS = {
-  "niveau_scolaire":"Niveau","code_mat":"Code",
-  "nom_mat":"Matière","type_mat":"Type",
-  "sem_mat":"Semestre","credit":"Crédits"
-};
 </script>
-<script src="/static/js/table.js"></script>
+<script src="/static/js/matieres-cards.js?v={{ ASSET_VERSION }}"></script>
 {% endblock %}

@@ -20,7 +20,7 @@ router = APIRouter(tags=["auth"])
 class InscriptionForm(BaseModel):
     nom:           str
     prenoms:       str
-    email:         EmailStr
+    email:         str
     mot_de_passe:  str
     role:          Optional[str] = "visiteur"
 
@@ -70,7 +70,7 @@ async def insert_user(payload: dict):
     r.raise_for_status()
     return r.json()
 
-async def update_connexion(user_id: int, ip: str):
+async def update_connexion(user_id: int, ip: Optional[str] = None):
     from config import SUPABASE_URL, SUPABASE_HEADERS
     import httpx
     h = SUPABASE_HEADERS.copy()
@@ -107,7 +107,7 @@ async def inscription(data: InscriptionForm, request: Request):
         "role":           "visiteur",
         "statut":         "actif",
         "date_inscription": datetime.utcnow().isoformat(),
-        "ip_connexion":   request.client.host
+        "ip_connexion":   request.client.host if request.client else None
     }
     await insert_user(payload)
     return {"ok": True, "message": "Inscription réussie ! Vous pouvez maintenant vous connecter."}
@@ -122,7 +122,7 @@ async def connexion(data: ConnexionForm, request: Request):
     if user["statut"] != "actif":
         raise HTTPException(status_code=403, detail="Votre compte est inactif ou banni.")
     # Mise à jour dernière connexion
-    await update_connexion(user["id"], request.client.host)
+    await update_connexion(user["id"], request.client.host if request.client else None)
     response = JSONResponse({
         "ok": True,
         "message": f"Bienvenue {user['prenoms']} {user['nom']} !",
@@ -145,7 +145,7 @@ async def demander_reinitialisation(data: DemandeReinitialisation):
 
     if not user:
         print(f"[RESET] Email inconnu: {data.email}")
-        return {"ok": True, "message": "Si cette adresse est associée à un compte, un lien de réinitialisation a été envoyé."}
+        return {"ok": True, "message": "Si cette adresse est associée à un compte, un lien de réinitialisation a été envoyé. Pensez à vérifier votre dossier spam/courrier indésirable."}
 
     if not RESEND_API_KEY:
         print(f"[RESET] Clé Resend absente pour {data.email}")
@@ -168,14 +168,14 @@ async def demander_reinitialisation(data: DemandeReinitialisation):
             "from": f"Classe Étoile <{EMAIL_EXPEDITEUR}>",
             "to": data.email,
             "subject": "Réinitialisation de votre mot de passe",
-            "html": f"<p>Bonjour,</p><p>Cliquez sur le lien suivant pour choisir un nouveau mot de passe :</p><p><a href=\"{lien}\">Réinitialiser mon mot de passe</a></p><p>Ce lien expire dans 30 minutes.</p>",
+            "html": f"<p>Bonjour,</p><p>Cliquez sur le lien suivant pour choisir un nouveau mot de passe :</p><p><a href=\"{lien}\">Réinitialiser mon mot de passe</a></p><p>Ce lien expire dans 30 minutes.</p><p style=\"color:#888;font-size:12px;\">Vous ne trouvez pas cet email ? Pensez à vérifier votre dossier spam / courrier indésirable.</p>",
         })
         print(f"[RESET] Email envoyé à {data.email} -> {response}")
     except Exception as exc:
         print(f"[RESET] ERREUR ENVOI EMAIL pour {data.email}: {exc}")
         return {"ok": False, "detail": "Impossible d'envoyer le mail pour le moment."}
 
-    return {"ok": True, "message": "Si cette adresse est associée à un compte, un lien de réinitialisation a été envoyé."}
+    return {"ok": True, "message": "Si cette adresse est associée à un compte, un lien de réinitialisation a été envoyé. Pensez à vérifier votre dossier spam/courrier indésirable."}
 
 @router.post("/auth/reinitialiser-mot-de-passe")
 async def appliquer_reinitialisation(data: NouveauMotDePasse):

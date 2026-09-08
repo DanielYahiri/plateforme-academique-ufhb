@@ -33,3 +33,8 @@ EMAIL_EXPEDITEUR   = os.environ.get("EMAIL_EXPEDITEUR", "bohdaniel946@danielyahi
 GEMINI_API_KEY      = os.environ.get("GEMINI_API_KEY")
 PASSWORD_RESET_SECRET = os.environ.get("PASSWORD_RESET_SECRET", "change-moi-avec-une-cle-secrete-assez-longue")
 APP_BASE_URL        = os.environ.get("APP_BASE_URL", "https://danielyahiri.online")
+import time
+# Par defaut, se base sur l'heure de demarrage du process : change a chaque
+# redemarrage (donc a chaque deploiement Render), sans jamais avoir a y penser.
+# ASSET_VERSION peut toujours etre force via une variable d'environnement si besoin.
+ASSET_VERSION       = os.environ.get("ASSET_VERSION", str(int(time.time())))

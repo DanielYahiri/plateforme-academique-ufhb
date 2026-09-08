@@ -74,24 +74,42 @@ const COL_LABELS = {
   "code_mat":"Code Mat."
 };
 </script>
-<script src="/static/js/table.js"></script>
+<script src="/static/js/table.js?v={{ ASSET_VERSION }}"></script>
 <script>
 // Pré-filtrage automatique si on arrive depuis une page pochette matière
-(async function () {
+(function () {
   const matiere = new URLSearchParams(window.location.search).get("matiere");
   if (!matiere || !API_POST) return;
-  try {
-    const r = await fetch(API_POST, {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ p_code_mat: matiere }),
-    });
-    const data = await r.json();
-    ALL_DATA = data;
-    renderTable(data);
-  } catch (e) {
-    console.error("Filtrage matière échoué :", e);
+
+  // Le filtre est déjà appliqué : la barre de filtre manuelle n'a plus lieu d'être
+  document.querySelector(".filter-bar")?.classList.add("hidden");
+
+  async function chargerFiltreParMatiere() {
+    showLoading(true);
+    try {
+      const r = await fetch(API_POST, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ p_code_mat: matiere }),
+      });
+      const data = await r.json();
+      if (!r.ok || !Array.isArray(data)) {
+        throw new Error(!r.ok ? (data.detail || `HTTP ${r.status}`) : "Réponse inattendue du serveur.");
+      }
+      ALL_DATA = data;
+      renderTable(data);
+    } catch (e) {
+      console.error("Filtrage matière échoué :", e);
+      showError("Erreur de filtrage : " + e.message);
+    } finally {
+      showLoading(false);
+    }
   }
+
+  // "Actualiser" doit relancer CE filtre, pas charger la liste complète
+  window.loadData = chargerFiltreParMatiere;
+
+  chargerFiltreParMatiere();
 })();
 </script>
 {% endblock %}

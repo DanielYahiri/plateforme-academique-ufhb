@@ -74,6 +74,7 @@ const API_POST = null;
 const COL_LABELS = {
   "annee_de_sortie":"Année Sortie","num_promo":"N° Promo",
   "description_promo":"Description","nbr_d_admis":"Total Admis",
+  "effectif_total":"Effectif Total",
   "nombre_homme_admis":"Hommes","nombre_femme_admises":"Femmes"
 };
 </script>
@@ -102,7 +103,22 @@ async function chargerGraphiques() {
         { label: "Femmes", data: data.map(p => p.nombre_femme_admises), backgroundColor: COULEUR_F },
       ],
     },
-    options: { responsive: true, plugins: { legend: { position: "bottom" } } },
+    options: {
+      responsive: true,
+      plugins: {
+        legend: { position: "bottom" },
+        tooltip: {
+          callbacks: {
+            afterBody: (items) => {
+              const p = data[items[0].dataIndex];
+              if (!p.effectif_total) return [];
+              const taux = ((p.nbr_d_admis / p.effectif_total) * 100).toFixed(1);
+              return [`Taux d'admission de la promotion : ${taux}% (${p.nbr_d_admis}/${p.effectif_total})`];
+            },
+          },
+        },
+      },
+    },
   });
 
   const select = document.getElementById("filtreAnnee");
@@ -119,7 +135,21 @@ async function chargerGraphiques() {
         labels: ["Hommes", "Femmes"],
         datasets: [{ data: [p.nombre_homme_admis, p.nombre_femme_admises], backgroundColor: [COULEUR_H, COULEUR_F] }],
       },
-      options: { responsive: true, plugins: { legend: { position: "bottom" } } },
+      options: {
+        responsive: true,
+        plugins: {
+          legend: { position: "bottom" },
+          tooltip: {
+            callbacks: {
+              afterBody: () => {
+                if (!p.effectif_total) return [];
+                const taux = ((p.nbr_d_admis / p.effectif_total) * 100).toFixed(1);
+                return [`Taux d'admission de la promotion : ${taux}% (${p.nbr_d_admis}/${p.effectif_total})`];
+              },
+            },
+          },
+        },
+      },
     });
   }
   dessinerCamembert(select.value);

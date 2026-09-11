@@ -42,7 +42,7 @@
   </div>
 
   <div class="chart-card">
-    <h3 class="chart-title">Parcours après la licence</h3>
+    <h3 class="chart-title parcours-title">Où sont passés nos Étoilés ?</h3>
     <p class="chart-sub">Plus un parcours apparaît, plus sa taille augmente.</p>
 
     <div id="wordCloudLoading" class="table-loading">
@@ -488,10 +488,13 @@ async function chargerNuageMots() {
     const compte = {};
 
     (Array.isArray(data) ? data : []).forEach(etu => {
-      const brut = etu.parcours_apres_licence;
-      if (!brut || !String(brut).trim()) return;
+      const brut = etu.ecole_admission;
+      if (!brut) return;
 
-      const cle = normaliserParcours(brut);
+      const valeur = String(brut).trim();
+      if (!valeur || /^(na|n\/?a|none|null)$/i.test(valeur)) return;
+
+      const cle = normaliserParcours(valeur);
       compte[cle] = (compte[cle] || 0) + 1;
     });
 
@@ -545,43 +548,14 @@ chargerNuageMots();
   }
 
   async function passerEnPaysage() {
-    let verrouillageOK = false;
-
-    /*
-     * Sur plusieurs navigateurs mobiles, le verrouillage
-     * d'orientation est autorisé uniquement en plein écran.
-     * On lance donc le plein écran après le clic de l'utilisateur.
-     */
-    try {
-      if (!document.fullscreenElement && document.documentElement.requestFullscreen) {
-        await document.documentElement.requestFullscreen();
-      }
-    } catch (e) {
-      console.debug("Plein écran non disponible :", e);
-    }
-
-    /* Puis on demande explicitement le mode paysage. */
     try {
       if (screen.orientation && screen.orientation.lock) {
         await screen.orientation.lock("landscape");
-        verrouillageOK = true;
       }
     } catch (e) {
+      // Certains navigateurs mobiles refusent le verrouillage d'orientation.
+      // Dans ce cas, l'utilisateur peut tourner le téléphone manuellement.
       console.debug("Verrouillage paysage non disponible :", e);
-    }
-
-    /*
-     * Le navigateur peut refuser la rotation automatique
-     * (notamment sur certains iPhone/iPad). Dans ce cas,
-     * la page reste fonctionnelle et invite simplement
-     * l'utilisateur à tourner son téléphone manuellement.
-     */
-    if (!verrouillageOK) {
-      const paragraphe = notice.querySelector("p");
-      if (paragraphe) {
-        paragraphe.textContent =
-          "Votre navigateur ne permet pas la rotation automatique. Tournez simplement votre téléphone en mode paysage ou activez simplement la rotation.";
-      }
     }
 
     mettreAJourNotice();

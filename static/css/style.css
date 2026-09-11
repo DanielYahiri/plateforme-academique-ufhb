@@ -784,6 +784,7 @@ html[data-theme="dark"] .theme-toggle .fa-moon { display: none; }
   margin:0 0 6px;
   line-height:1.35;
   display:-webkit-box;
+  line-clamp: 2;
   -webkit-line-clamp:2;
   -webkit-box-orient:vertical;
   overflow:hidden;
@@ -802,3 +803,236 @@ html[data-theme="dark"] .theme-toggle .fa-moon { display: none; }
 .pochette-vide:hover{transform:none}
 .pochette-cta{display:inline-flex;align-items:center;gap:4px;font-size:11.5px;font-weight:600;color:var(--secondary);text-decoration:none;margin-top:6px}
 .pochette-cta:hover{color:var(--primary)}
+
+/* ✅ PROMOTIONS — NUAGE DE BULLES / PARCOURS APRÈS LA LICENCE */
+.chart-sub {
+  color: var(--muted);
+  font-size: 13px;
+  margin: -6px 0 14px;
+}
+
+.wordcloud-wrap {
+  width: 100%;
+  min-height: 390px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  overflow: hidden;
+  padding: 4px 0 10px;
+}
+
+.bubble-cloud {
+  width: 100%;
+  max-width: 980px;
+  height: 390px;
+  margin: 0 auto;
+  position: relative;
+}
+
+.wordcloud-svg {
+  display: block;
+  width: 100%;
+  height: 100%;
+  overflow: visible;
+}
+
+.bubble-item {
+  cursor: default;
+}
+
+.bubble-circle {
+  stroke: rgba(255,255,255,.72);
+  stroke-width: 2px;
+  fill-opacity: .93;
+  filter: drop-shadow(0 5px 10px rgba(0,0,0,.10));
+  transition: transform .18s ease, fill-opacity .18s ease, filter .18s ease;
+  transform-box: fill-box;
+  transform-origin: center;
+}
+
+.bubble-item:hover .bubble-circle {
+  transform: scale(1.06);
+  fill-opacity: 1;
+  filter: drop-shadow(0 8px 16px rgba(0,0,0,.18));
+}
+
+.bubble-fo {
+  pointer-events: none;
+  overflow: visible;
+}
+
+.bubble-content {
+  width: 100%;
+  height: 100%;
+  min-width: 100%;
+  min-height: 100%;
+  display: flex !important;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+  color: #fff;
+  padding: 10px;
+  box-sizing: border-box;
+  overflow: hidden;
+  line-height: 1.15;
+}
+
+.bubble-label {
+  display: flex !important;
+  align-items: center;
+  justify-content: center;
+  width: 100%;
+  max-width: 100%;
+  max-height: 100%;
+  margin: 0 auto;
+  box-sizing: border-box;
+  font-family: var(--font);
+  font-weight: 800;
+  white-space: pre-line;
+  text-align: center;
+  overflow: hidden;
+  overflow-wrap: anywhere;
+  word-break: normal;
+  text-shadow: 0 1px 2px rgba(0,0,0,.22);
+}
+
+
+html[data-theme="dark"] .bubble-circle {
+  stroke: rgba(255,255,255,.40);
+  filter: drop-shadow(0 6px 12px rgba(0,0,0,.26));
+}
+
+html[data-theme="dark"] .bubble-item:hover .bubble-circle {
+  filter: drop-shadow(0 9px 18px rgba(0,0,0,.40));
+}
+
+@media (max-width: 650px) {
+  .wordcloud-wrap {
+    min-height: 320px;
+    padding: 0;
+    overflow: hidden;
+  }
+
+  .bubble-cloud {
+    width: 100%;
+    max-width: 100%;
+    height: 350px;
+    overflow: hidden;
+  }
+
+  .wordcloud-svg {
+    width: 100%;
+    max-width: 100%;
+    height: 100%;
+    overflow: hidden;
+  }
+
+  .bubble-label {
+    padding: 7px;
+    line-height: 1.1;
+    overflow-wrap: anywhere;
+  }
+}
+
+/* ── ORIENTATION MOBILE — PAGE PROMOTIONS ───────────────── */
+
+.orientation-notice {
+  display: none;
+}
+
+@media (max-width: 768px) and (orientation: portrait) {
+
+  .orientation-notice {
+    position: fixed;
+    inset: 0;
+    z-index: 99999;
+
+    display: flex;
+    align-items: center;
+    justify-content: center;
+
+    padding: 24px;
+
+    background: rgba(15, 23, 32, 0.96);
+    backdrop-filter: blur(6px);
+  }
+
+  .orientation-card {
+    width: min(360px, 100%);
+
+    background: var(--white);
+    color: var(--text);
+
+    border-radius: 16px;
+
+    padding: 28px 22px;
+
+    text-align: center;
+
+    box-shadow: 0 18px 45px rgba(0, 0, 0, .25);
+  }
+
+  .orientation-icon {
+    width: 64px;
+    height: 64px;
+
+    margin: 0 auto 18px;
+
+    border-radius: 50%;
+
+    display: flex;
+    align-items: center;
+    justify-content: center;
+
+    background: rgba(26, 82, 118, .12);
+    color: var(--primary);
+
+    font-size: 28px;
+
+    animation: orientationRotate 1.8s ease-in-out infinite;
+  }
+
+  .orientation-card h2 {
+    margin-bottom: 10px;
+
+    color: var(--primary);
+
+    font-size: 20px;
+    font-weight: 800;
+  }
+
+  .orientation-card p {
+    margin-bottom: 20px;
+
+    color: var(--muted);
+
+    font-size: 13px;
+    line-height: 1.6;
+  }
+
+  .orientation-card .btn {
+    width: 100%;
+    justify-content: center;
+  }
+}
+
+@keyframes orientationRotate {
+
+  0% {
+    transform: rotate(0deg);
+  }
+
+  35% {
+    transform: rotate(90deg);
+  }
+
+  65% {
+    transform: rotate(90deg);
+  }
+
+  100% {
+    transform: rotate(0deg);
+  }
+
+}

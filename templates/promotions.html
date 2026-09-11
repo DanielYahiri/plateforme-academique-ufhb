@@ -4,9 +4,23 @@
 
 {% block content %}
 <div class="page-container">
+<div id="promotionsOrientationNotice" class="promotions-orientation-notice" aria-hidden="true">
+  <div class="promotions-orientation-card">
+    <div class="promotions-orientation-icon" aria-hidden="true">
+      <i class="fas fa-mobile-screen-button"></i>
+    </div>
+    <h2>Tournez votre téléphone</h2>
+    <p>Cette page est optimisée en mode paysage pour mieux voir les graphiques et les parcours.</p>
+    <button id="promotionsOrientationButton" class="btn btn-primary" type="button">
+      <i class="fas fa-rotate"></i>
+      Passer en paysage
+    </button>
+  </div>
+</div>
+
   <div class="page-header">
     <div>
-      <h1 class="page-title">📊  Promotions Sortantes</h1>
+      <h1 class="page-title">📊 Promotions Sortantes</h1>
       <p class="page-sub">Statistiques des promotions par année et genre</p>
     </div>
     <button class="btn btn-primary" onclick="loadData()"><i class="fas fa-rotate-right"></i> Actualiser</button>
@@ -24,6 +38,23 @@
     </div>
     <div class="chart-donut-wrap">
       <canvas id="chartCamembert"></canvas>
+    </div>
+  </div>
+
+  <div class="chart-card">
+    <h3 class="chart-title">Parcours après la licence</h3>
+    <p class="chart-sub">Plus un parcours apparaît, plus sa taille augmente.</p>
+
+    <div id="wordCloudLoading" class="table-loading">
+      <div class="spinner"></div><span>Chargement…</span>
+    </div>
+
+    <div id="wordCloudEmpty" class="table-empty hidden">Aucune donnée de parcours disponible.</div>
+
+    <div id="wordCloud" class="wordcloud-wrap hidden">
+      <div class="bubble-cloud" id="bubbleCloud">
+        <svg id="wordCloudSvg" class="wordcloud-svg" role="img" aria-label="Nuage des parcours après la licence"></svg>
+      </div>
     </div>
   </div>
 
@@ -49,6 +80,80 @@
       <tbody id="tableBody"></tbody>
     </table>
   </div>
+
+<style>
+/* ── ORIENTATION MOBILE : ONGLET PROMOTIONS UNIQUEMENT ───────────── */
+.promotions-orientation-notice {
+  display: none;
+}
+
+@media (max-width: 768px) and (orientation: portrait) {
+  .promotions-orientation-notice {
+    position: fixed;
+    inset: 0;
+    z-index: 100000;
+
+    display: flex;
+    align-items: center;
+    justify-content: center;
+
+    padding: 20px;
+    background: rgba(15, 23, 32, 0.97);
+    backdrop-filter: blur(7px);
+  }
+
+  .promotions-orientation-card {
+    width: min(360px, 100%);
+    padding: 28px 22px;
+    border-radius: 16px;
+    background: var(--white);
+    color: var(--text);
+    text-align: center;
+    box-shadow: 0 18px 48px rgba(0, 0, 0, .28);
+  }
+
+  .promotions-orientation-icon {
+    width: 64px;
+    height: 64px;
+    margin: 0 auto 18px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: rgba(26, 82, 118, .12);
+    color: var(--primary);
+    font-size: 28px;
+    animation: promotionsOrientationRotate 1.8s ease-in-out infinite;
+  }
+
+  .promotions-orientation-card h2 {
+    margin: 0 0 10px;
+    color: var(--primary);
+    font-size: 20px;
+    font-weight: 800;
+  }
+
+  .promotions-orientation-card p {
+    margin: 0 0 20px;
+    color: var(--muted);
+    font-size: 13px;
+    line-height: 1.6;
+  }
+
+  .promotions-orientation-card .btn {
+    width: 100%;
+    justify-content: center;
+  }
+}
+
+@keyframes promotionsOrientationRotate {
+  0% { transform: rotate(0deg); }
+  35% { transform: rotate(90deg); }
+  65% { transform: rotate(90deg); }
+  100% { transform: rotate(0deg); }
+}
+</style>
+
 </div>
 {% endblock %}
 
@@ -78,8 +183,10 @@ const COL_LABELS = {
   "nombre_homme_admis":"Hommes","nombre_femme_admises":"Femmes"
 };
 </script>
+
 <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.4/dist/chart.umd.min.js"></script>
 <script src="/static/js/table.js?v={{ ASSET_VERSION }}"></script>
+
 <script>
 let chartBarres = null;
 let chartCamembert = null;
@@ -152,9 +259,346 @@ async function chargerGraphiques() {
       },
     });
   }
+
   dessinerCamembert(select.value);
   select.onchange = () => dessinerCamembert(select.value);
 }
 chargerGraphiques();
+
+// ── NUAGE DE BULLES : Parcours après licence ──────────────────────
+const API_ETUDIANTS = "/api/etudiants";
+
+const WORDCLOUD_PALETTE = [
+  "#1A5276",
+  "#F39C12",
+  "#1E8449",
+  "#922B21",
+  "#7D3C98",
+  "#117864",
+  "#B9770E"
+];
+
+let wordCloudEntries = [];
+let resizeWordCloudTimer = null;
+
+function normaliserParcours(texte) {
+  return String(texte)
+    .trim()
+    .replace(/_/g, " ")
+    .replace(/\s+/g, " ");
+}
+
+function estSombre() {
+  return document.documentElement.getAttribute("data-theme") === "dark";
+}
+
+function calculerRayon(n, maxN, total, width, height) {
+  const mobile = width <= 650;
+
+  /*
+   * Sur mobile, les bulles doivent être nettement plus petites :
+   * la largeur disponible est beaucoup plus faible que sur desktop.
+   */
+  let MIN_R;
+  let MAX_R;
+
+  if (mobile) {
+    MAX_R = Math.min(62, Math.max(48, width * 0.16));
+    MIN_R = total <= 8
+      ? Math.min(38, MAX_R * 0.62)
+      : Math.min(32, MAX_R * 0.54);
+  } else {
+    MIN_R = total <= 8 ? 48 : 40;
+    MAX_R = total <= 8 ? 88 : 76;
+  }
+
+  const ratio = maxN <= 0 ? 0.5 : Math.sqrt(n / maxN);
+  return MIN_R + ratio * (MAX_R - MIN_R);
+}
+
+function creerLignesTexte(texte, rayon) {
+  const mots = String(texte).split(" ");
+  const largeurMax = Math.max(90, rayon * 1.55);
+  const lignes = [];
+  let ligne = "";
+
+  function largeurApprox(s, taille) {
+    return s.length * taille * 0.57;
+  }
+
+  const taille = rayon >= 70 ? 14 : rayon >= 52 ? 12.5 : 11.5;
+
+  mots.forEach(mot => {
+    const test = ligne ? `${ligne} ${mot}` : mot;
+    if (ligne && largeurApprox(test, taille) > largeurMax) {
+      lignes.push(ligne);
+      ligne = mot;
+    } else {
+      ligne = test;
+    }
+  });
+
+  if (ligne) lignes.push(ligne);
+
+  return {
+    lignes: lignes.slice(0, 4),
+    taille
+  };
+}
+
+function seChevauchent(a, b, marge = 5) {
+  const dx = a.x - b.x;
+  const dy = a.y - b.y;
+  const distance = Math.sqrt(dx * dx + dy * dy);
+  return distance < (a.r + b.r + marge);
+}
+
+function trouverPosition(rayon, placees, width, height, seedIndex) {
+  const cx = width / 2;
+  const cy = height / 2;
+
+  if (placees.length === 0) {
+    return { x: cx, y: cy };
+  }
+
+  // Spirale douce pour obtenir un nuage compact et lisible.
+  for (let step = 0; step < 2400; step++) {
+    const angle = (step * 0.43) + seedIndex * 0.9;
+    const distance = 7 + step * 1.55;
+
+    const x = cx + Math.cos(angle) * distance;
+    const y = cy + Math.sin(angle) * distance * 0.66;
+
+    if (x - rayon < 8 || x + rayon > width - 8) continue;
+    if (y - rayon < 8 || y + rayon > height - 8) continue;
+
+    const candidat = { x, y, r: rayon };
+    let collision = false;
+
+    for (const autre of placees) {
+      if (seChevauchent(candidat, autre, 5)) {
+        collision = true;
+        break;
+      }
+    }
+
+    if (!collision) {
+      return { x, y };
+    }
+  }
+
+  // Fallback : on cherche un emplacement libre par grille.
+  for (let y = rayon + 8; y <= height - rayon - 8; y += 8) {
+    for (let x = rayon + 8; x <= width - rayon - 8; x += 8) {
+      const candidat = { x, y, r: rayon };
+      if (!placees.some(autre => seChevauchent(candidat, autre, 5))) {
+        return { x, y };
+      }
+    }
+  }
+
+  // Dernier recours : centre du nuage.
+  return { x: cx, y: cy };
+}
+
+function ajouterBulle(svg, item, index, maxN, total, width, height) {
+  const NS = "http://www.w3.org/2000/svg";
+  const rayon = calculerRayon(item.n, maxN, total, width, height);
+  const position = trouverPosition(rayon, ajouterBulle.placees, width, height, index);
+  const couleur = WORDCLOUD_PALETTE[index % WORDCLOUD_PALETTE.length];
+
+  const g = document.createElementNS(NS, "g");
+  g.classList.add("bubble-item");
+  g.setAttribute("transform", `translate(${position.x}, ${position.y})`);
+
+  const title = document.createElementNS(NS, "title");
+  title.textContent = `${item.texte} — ${item.n} étoilé${item.n > 1 ? "s" : ""}`;
+  g.appendChild(title);
+
+  const circle = document.createElementNS(NS, "circle");
+  circle.setAttribute("r", rayon);
+  circle.setAttribute("fill", couleur);
+  circle.classList.add("bubble-circle");
+  g.appendChild(circle);
+
+  const contenu = creerLignesTexte(item.texte, rayon);
+  const fo = document.createElementNS(NS, "foreignObject");
+  const taille = rayon * 1.72;
+  fo.setAttribute("x", -taille / 2);
+  fo.setAttribute("y", -rayon * 0.72);
+  fo.setAttribute("width", taille);
+  fo.setAttribute("height", rayon * 1.45);
+  fo.setAttribute("class", "bubble-fo");
+
+  const div = document.createElement("div");
+  div.className = "bubble-content";
+
+  const label = document.createElement("span");
+  label.className = "bubble-label";
+  label.style.fontSize = `${contenu.taille}px`;
+  label.textContent = contenu.lignes.join("\n");
+
+  div.appendChild(label);
+  fo.appendChild(div);
+  g.appendChild(fo);
+
+  svg.appendChild(g);
+
+  ajouterBulle.placees.push({ x: position.x, y: position.y, r: rayon });
+}
+
+function dessinerNuageBulles(entries) {
+  const svg = document.getElementById("wordCloudSvg");
+  if (!svg) return;
+
+  const rect = svg.parentElement.getBoundingClientRect();
+  const width = Math.max(300, Math.round(rect.width));
+  const mobile = width <= 650;
+
+  /* Hauteur légèrement plus généreuse sur mobile pour éviter l'empilement. */
+  const height = mobile
+    ? Math.max(320, Math.min(390, Math.round(width * 0.92)))
+    : 390;
+
+  svg.setAttribute("viewBox", `0 0 ${width} ${height}`);
+  svg.setAttribute("width", width);
+  svg.setAttribute("height", height);
+  svg.innerHTML = "";
+
+  ajouterBulle.placees = [];
+
+  const maxN = entries[0]?.n || 1;
+
+  entries.forEach((item, index) => {
+    ajouterBulle(svg, item, index, maxN, entries.length, width, height);
+  });
+}
+
+async function chargerNuageMots() {
+  const elLoading = document.getElementById("wordCloudLoading");
+  const elEmpty   = document.getElementById("wordCloudEmpty");
+  const elCloud   = document.getElementById("wordCloud");
+
+  try {
+    const r = await fetch(API_ETUDIANTS);
+    if (!r.ok) throw new Error("Erreur API");
+
+    const data = await r.json();
+
+    const compte = {};
+
+    (Array.isArray(data) ? data : []).forEach(etu => {
+      const brut = etu.parcours_apres_licence;
+      if (!brut || !String(brut).trim()) return;
+
+      const cle = normaliserParcours(brut);
+      compte[cle] = (compte[cle] || 0) + 1;
+    });
+
+    wordCloudEntries = Object.entries(compte)
+      .map(([texte, n]) => ({ texte, n }))
+      .sort((a, b) => b.n - a.n || a.texte.localeCompare(b.texte, "fr"));
+
+    elLoading.classList.add("hidden");
+
+    if (wordCloudEntries.length === 0) {
+      elEmpty.classList.remove("hidden");
+      return;
+    }
+
+    elCloud.classList.remove("hidden");
+    dessinerNuageBulles(wordCloudEntries);
+
+  } catch (e) {
+    console.error("Erreur nuage de parcours :", e);
+    elLoading.classList.add("hidden");
+    elEmpty.textContent = "Impossible de charger les données de parcours.";
+    elEmpty.classList.remove("hidden");
+  }
+}
+
+window.addEventListener("resize", () => {
+  if (!wordCloudEntries.length) return;
+  clearTimeout(resizeWordCloudTimer);
+  resizeWordCloudTimer = setTimeout(() => {
+    dessinerNuageBulles(wordCloudEntries);
+  }, 150);
+});
+
+chargerNuageMots();
+
+// ── ORIENTATION MOBILE : ONGLET PROMOTIONS UNIQUEMENT ─────────────
+(function () {
+  const notice = document.getElementById("promotionsOrientationNotice");
+  const button = document.getElementById("promotionsOrientationButton");
+
+  if (!notice) return;
+
+  function estMobilePortrait() {
+    return window.innerWidth <= 768 &&
+           window.matchMedia("(orientation: portrait)").matches;
+  }
+
+  function mettreAJourNotice() {
+    const portrait = estMobilePortrait();
+    notice.setAttribute("aria-hidden", portrait ? "false" : "true");
+  }
+
+  async function passerEnPaysage() {
+    let verrouillageOK = false;
+
+    /*
+     * Sur plusieurs navigateurs mobiles, le verrouillage
+     * d'orientation est autorisé uniquement en plein écran.
+     * On lance donc le plein écran après le clic de l'utilisateur.
+     */
+    try {
+      if (!document.fullscreenElement && document.documentElement.requestFullscreen) {
+        await document.documentElement.requestFullscreen();
+      }
+    } catch (e) {
+      console.debug("Plein écran non disponible :", e);
+    }
+
+    /* Puis on demande explicitement le mode paysage. */
+    try {
+      if (screen.orientation && screen.orientation.lock) {
+        await screen.orientation.lock("landscape");
+        verrouillageOK = true;
+      }
+    } catch (e) {
+      console.debug("Verrouillage paysage non disponible :", e);
+    }
+
+    /*
+     * Le navigateur peut refuser la rotation automatique
+     * (notamment sur certains iPhone/iPad). Dans ce cas,
+     * la page reste fonctionnelle et invite simplement
+     * l'utilisateur à tourner son téléphone manuellement.
+     */
+    if (!verrouillageOK) {
+      const paragraphe = notice.querySelector("p");
+      if (paragraphe) {
+        paragraphe.textContent =
+          "Votre navigateur ne permet pas la rotation automatique. Tournez simplement votre téléphone en mode paysage ou activez simplement la rotation.";
+      }
+    }
+
+    mettreAJourNotice();
+  }
+
+  if (button) {
+    button.addEventListener("click", passerEnPaysage);
+  }
+
+  window.addEventListener("resize", mettreAJourNotice);
+  window.addEventListener("orientationchange", mettreAJourNotice);
+
+  if (screen.orientation) {
+    screen.orientation.addEventListener("change", mettreAJourNotice);
+  }
+
+  mettreAJourNotice();
+})();
 </script>
 {% endblock %}

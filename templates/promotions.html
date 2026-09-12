@@ -488,7 +488,7 @@ async function chargerNuageMots() {
     const compte = {};
 
     (Array.isArray(data) ? data : []).forEach(etu => {
-      const brut = etu.ecole_admission;
+      const brut = etu.parcours_apres_licence;
       if (!brut) return;
 
       const valeur = String(brut).trim();
